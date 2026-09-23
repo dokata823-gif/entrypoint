@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>모바일 주식 차트</title>
+    <title>모바일 주식 차트 - TradingView 드로잉 직선 기능</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -65,16 +65,16 @@
         </div>
         <button 
             onclick="loadChart()" 
-            class="h-10 px-4 bg-[#2962ff] hover:bg-[#1e4bd8] active:bg-[#1b43c6] text-white font-bold rounded-lg text-sm transition shrink-0"
+            class="h-10 px-4 bg-[#2962ff] hover:bg-[#1e4bd8] active:bg-[#1b43c6] text-white font-bold rounded-lg text-sm transition shrink-0 flex items-center gap-1"
         >
-            조회
+            <span>조회</span>
         </button>
     </header>
 
-    <!-- 2. Peak & 0.7 Level Info Bar (고점 및 고점 * 0.7 계산 패널) -->
+    <!-- 2. Peak & 0.7 Level Info Bar (고점 및 0.7 타점 바) -->
     <section class="bg-[#181c27] border-b border-[#2a2e39] px-3 py-1.5 shrink-0 flex items-center justify-between gap-2 text-xs">
         
-        <!-- Peak Input (고점 직접 입력 및 확인) -->
+        <!-- Peak Input (고점 입력) -->
         <div class="flex items-center gap-1.5">
             <span class="text-amber-400 font-bold flex items-center gap-1 text-[11px]">
                 <i data-lucide="crown" class="w-3.5 h-3.5"></i> 고점:
@@ -89,50 +89,35 @@
             />
         </div>
 
-        <!-- 0.7 Target Output (고점 * 0.7 = -30% 타점) -->
+        <!-- 0.7 Target Output (고점 * 0.7 타점) -->
         <div class="flex items-center gap-1.5 bg-[#131722] px-2.5 py-1 rounded-lg border border-emerald-500/30">
             <span class="text-emerald-400 font-bold text-[11px]">고점 × 0.7:</span>
             <span id="target07Display" class="font-mono font-black text-sm text-emerald-300">$878.50</span>
             <span class="text-[10px] text-emerald-500 font-bold">(-30%)</span>
         </div>
 
-        <!-- Full Matrix Toggle Button -->
+        <!-- Drawing Tool Guide Toggle -->
         <button 
-            onclick="toggleDetailsModal()" 
-            class="h-8 px-2 bg-[#2a2e39] hover:bg-[#363a45] text-blue-400 text-xs rounded font-bold border border-slate-700 flex items-center gap-1 transition"
+            onclick="toggleDrawGuide()" 
+            class="h-8 px-2 bg-[#2a2e39] hover:bg-[#363a45] text-amber-300 text-xs rounded font-bold border border-amber-500/40 flex items-center gap-1 transition"
         >
-            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-            <span>타점표</span>
+            <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+            <span>직선 툴</span>
         </button>
     </section>
 
-    <!-- 3. Multi-Level Drop Grid Dropdown (Collapsible) -->
-    <div id="detailsDrawer" class="hidden bg-[#181c27] border-b border-[#2a2e39] px-3 py-2 shrink-0 z-40">
-        <div class="grid grid-cols-5 gap-1.5 text-center text-xs font-mono">
-            <div class="bg-[#131722] p-1 rounded border border-blue-900/40">
-                <span class="text-[9px] text-blue-400 font-bold block">× 0.70 (-30%)</span>
-                <span id="lv30" class="text-xs font-bold text-white mt-0.5 block">$878.50</span>
-            </div>
-            <div class="bg-[#131722] p-1 rounded border border-cyan-900/40">
-                <span class="text-[9px] text-cyan-400 font-bold block">× 0.65 (-35%)</span>
-                <span id="lv35" class="text-xs font-bold text-white mt-0.5 block">$815.75</span>
-            </div>
-            <div class="bg-[#131722] p-1 rounded border border-emerald-900/40">
-                <span class="text-[9px] text-emerald-400 font-bold block">× 0.60 (-40%)</span>
-                <span id="lv40" class="text-xs font-bold text-white mt-0.5 block">$753.00</span>
-            </div>
-            <div class="bg-[#131722] p-1 rounded border border-orange-900/40">
-                <span class="text-[9px] text-orange-400 font-bold block">× 0.55 (-45%)</span>
-                <span id="lv45" class="text-xs font-bold text-white mt-0.5 block">$690.25</span>
-            </div>
-            <div class="bg-[#131722] p-1 rounded border border-rose-900/40">
-                <span class="text-[9px] text-rose-400 font-bold block">× 0.50 (-50%)</span>
-                <span id="lv50" class="text-xs font-bold text-white mt-0.5 block">$627.50</span>
-            </div>
+    <!-- 3. Drawing Guide Banner (Collapsible) -->
+    <div id="drawGuideBanner" class="bg-[#1c2333] border-b border-[#2a2e39] px-3 py-2 text-xs text-slate-200 shrink-0 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-amber-400 shrink-0"></i>
+            <span>차트 좌측 툴바의 <strong>선 도구(2번째 아이콘) → 수평선(Horizontal Line)</strong>을 선택 후 원하는 가격대를 터치하면 직선이 그어집니다.</span>
         </div>
+        <button onclick="toggleDrawGuide()" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
     </div>
 
-    <!-- 4. Original TradingView Real-Time Chart (Clean & Fullscreen) -->
+    <!-- 4. Original TradingView Chart with Full Drawing Tools Enabled -->
     <main class="flex-1 w-full relative">
         <div id="tv_chart_container" class="w-full h-full"></div>
     </main>
@@ -140,9 +125,8 @@
     <script>
         lucide.createIcons();
 
-        // Preset stock peak references
         const DEFAULT_PEAKS = {
-            'MU': 1255,      // 2026-06-26 peak: 1255.00
+            'MU': 1255,
             'NVDA': 140.76,
             'AAPL': 237.23,
             'TSLA': 271.00,
@@ -167,7 +151,6 @@
             return `$${val.toFixed(2)}`;
         }
 
-        // Recalculate 0.7 and other pullback levels based on Peak Price
         function recalculateTargets() {
             const peakInput = document.getElementById('peakPriceInput');
             const peak = parseFloat(peakInput.value) || 0;
@@ -175,32 +158,21 @@
             const isKRW = /^\d{6}$/.test(ticker) || ticker.startsWith('KRX:');
 
             const target07 = peak * 0.70;
-            const target065 = peak * 0.65;
-            const target060 = peak * 0.60;
-            const target055 = peak * 0.55;
-            const target050 = peak * 0.50;
-
             document.getElementById('target07Display').textContent = formatVal(target07, isKRW);
-            document.getElementById('lv30').textContent = formatVal(target07, isKRW);
-            document.getElementById('lv35').textContent = formatVal(target065, isKRW);
-            document.getElementById('lv40').textContent = formatVal(target060, isKRW);
-            document.getElementById('lv45').textContent = formatVal(target055, isKRW);
-            document.getElementById('lv50').textContent = formatVal(target050, isKRW);
         }
 
-        function toggleDetailsModal() {
-            const drawer = document.getElementById('detailsDrawer');
-            drawer.classList.toggle('hidden');
+        function toggleDrawGuide() {
+            const banner = document.getElementById('drawGuideBanner');
+            banner.classList.toggle('hidden');
         }
 
-        // Load Original TradingView Real-Time Chart
+        // Load TradingView Chart with Full Side Drawing Toolbar (직선/수평선 작도 툴 활성화)
         function loadChart() {
             const input = document.getElementById('tickerInput');
             const rawTicker = input.value.trim();
             const symbol = normalizeTicker(rawTicker);
-            input.blur(); // 모바일 키보드 닫기
+            input.blur();
 
-            // Update default peak if known
             const cleanKey = rawTicker.toUpperCase().replace('KRX:', '');
             if (DEFAULT_PEAKS[cleanKey]) {
                 document.getElementById('peakPriceInput').value = DEFAULT_PEAKS[cleanKey];
@@ -228,6 +200,8 @@
                     "toolbar_bg": "#1e222d",
                     "enable_publishing": false,
                     "allow_symbol_change": true,
+                    "hide_side_toolbar": false,     // ★ 좌측 드로잉/직선 툴바 활성화 ★
+                    "withdateranges": true,
                     "container_id": "tradingview_widget",
                     "studies": [
                         "MASimple@tv-basicstudies",
@@ -237,11 +211,8 @@
             }
         }
 
-        // Enter Key Listener
         document.getElementById('tickerInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                loadChart();
-            }
+            if (e.key === 'Enter') loadChart();
         });
 
         document.getElementById('peakPriceInput').addEventListener('keydown', function(e) {
@@ -251,7 +222,6 @@
             }
         });
 
-        // Initial Load
         window.addEventListener('DOMContentLoaded', function() {
             loadChart();
         });
