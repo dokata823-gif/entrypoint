@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>전문가 차트 분석 대시보드 - MU 분할 매수 타점 분석</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pro Entry Point - 모바일 주식 분할 매수 타점 분석기</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -17,626 +17,608 @@
                 extend: {
                     colors: {
                         dark: {
-                            900: '#0b0f17',
-                            800: '#111827',
-                            700: '#1f293d',
-                            600: '#324158'
-                        },
-                        accent: {
-                            blue: '#3b82f6',
-                            green: '#10b981',
-                            red: '#ef4444',
-                            amber: '#f59e0b',
-                            purple: '#8b5cf6'
+                            950: '#070a0f',
+                            900: '#0d131f',
+                            800: '#151d2e',
+                            700: '#222f46',
+                            600: '#344563'
                         }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'SF Pro Mono', 'Menlo', 'monospace']
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap');
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            background-color: #0b0f17;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #070a0f;
             color: #e2e8f0;
+            overflow-x: hidden;
+            touch-action: pan-y;
         }
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
+
+        /* Prevent unwanted horizontal overflow on mobile */
+        html, body {
+            max-width: 100vw;
+            width: 100%;
         }
-        /* Custom Scrollbar */
+
+        /* Custom Mobile Select dropdown styling */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* Smooth subtle scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
         }
         ::-webkit-scrollbar-track {
-            background: #111827;
+            background: #0d131f;
         }
         ::-webkit-scrollbar-thumb {
-            background: #374151;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4b5563;
+            background: #222f46;
+            border-radius: 2px;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#0b0f17] text-slate-200">
+<body class="min-h-screen flex flex-col bg-[#070a0f] text-slate-100 antialiased pb-12">
 
-    <!-- Top Navigation Header -->
-    <header class="border-b border-slate-800 bg-[#111827]/90 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
-        <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4">
-            <!-- Brand & Active Ticker -->
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2.5">
-                    <div class="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2 rounded-xl text-white shadow-lg shadow-blue-500/20">
-                        <i data-lucide="candlestick-chart" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                            PRO ENTRY POINT
-                            <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">v1.0</span>
-                        </h1>
-                        <p class="text-xs text-slate-400">전고점 대비 역추세 분할 매수 분석 시스템</p>
-                    </div>
+    <!-- Top Sticky Mobile Header -->
+    <header class="sticky top-0 z-50 bg-[#0d131f]/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
+                    <i data-lucide="candlestick-chart" class="w-4 h-4"></i>
                 </div>
-
-                <div class="h-6 w-[1px] bg-slate-700 hidden sm:block"></div>
-
-                <!-- Ticker Control -->
-                <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
-                    <span class="text-xs text-slate-400 font-semibold">TICKER:</span>
-                    <input id="tickerInput" type="text" value="NASDAQ:MU" class="bg-transparent text-sm font-bold font-mono text-emerald-400 focus:outline-none w-28 uppercase" />
-                    <button id="applyTickerBtn" class="bg-slate-700 hover:bg-slate-600 text-xs px-2 py-1 rounded text-white font-medium transition">
-                        적용
-                    </button>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-sm font-extrabold tracking-tight text-white">ENTRY POINT</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded font-mono font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">PRO</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400">전고점 대비 5단계 분할 매수선</p>
                 </div>
             </div>
 
-            <!-- Peak (전고점) Setting Control -->
-            <div class="flex items-center gap-3 bg-slate-900/90 p-1.5 px-3 rounded-xl border border-slate-700/80 shadow-inner">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="trending-up" class="w-4 h-4 text-amber-400"></i>
-                    <label for="peakPriceInput" class="text-xs font-semibold text-slate-300">기준 전고점 (ATH):</label>
-                    <div class="relative">
-                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs">$</span>
-                        <input id="peakPriceInput" type="number" step="0.1" value="157.50" 
-                            class="bg-slate-800 text-amber-300 font-mono font-bold text-sm pl-6 pr-3 py-1 rounded-lg border border-slate-600 focus:border-amber-400 focus:outline-none w-28 text-right" />
-                    </div>
-                </div>
-
-                <button id="recalcBtn" class="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-1 rounded-lg text-xs font-bold transition shadow-md shadow-amber-500/20">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                    타점 재계산
-                </button>
-            </div>
-
-            <!-- Chart Switcher Buttons -->
-            <div class="flex items-center bg-slate-800 p-1 rounded-lg border border-slate-700">
-                <button id="tabTradingView" class="px-3 py-1 text-xs font-semibold rounded-md bg-blue-600 text-white shadow transition flex items-center gap-1.5">
-                    <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-                    TradingView 실시간 차트
-                </button>
-                <button id="tabCustomOverlay" class="px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-white transition flex items-center gap-1.5">
-                    <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                    타점 오버레이 차트
-                </button>
+            <!-- Quick ATH Badge -->
+            <div class="text-right">
+                <span class="text-[10px] text-slate-400 block font-medium">기준 전고점(Peak)</span>
+                <span id="headerAthPrice" class="text-xs font-bold font-mono text-amber-400">$157.50</span>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Grid -->
-    <main class="flex-1 max-w-[1920px] w-full mx-auto p-4 grid grid-cols-1 xl:grid-cols-12 gap-4">
-        
-        <!-- Left: Interactive Chart Container (Col 9 / 12) -->
-        <section class="xl:col-span-9 flex flex-col gap-4">
-            
-            <!-- Chart Card -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col flex-1 shadow-2xl relative min-h-[640px]">
-                
-                <!-- Chart Title & Status Bar -->
-                <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-800">
-                    <div class="flex items-center gap-3">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-                            실시간 분석 모드
-                        </span>
-                        <h2 id="chartTickerTitle" class="text-sm font-bold text-white font-mono">NASDAQ:MU (Micron Technology, Inc.)</h2>
-                    </div>
+    <!-- Main Mobile Content Area -->
+    <main class="flex-1 w-full max-w-md mx-auto px-3.5 pt-3 space-y-3.5">
 
-                    <!-- Overlay Quick Toggles -->
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="text-slate-400">수평 지지선:</span>
-                        <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-slate-800 rounded border border-slate-700 text-red-400">
-                            <span class="w-2 h-0.5 bg-red-500"></span> 전고점
-                        </span>
-                        <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-slate-800 rounded border border-slate-700 text-blue-400">
-                            <span class="w-2 h-0.5 bg-blue-500"></span> 1~5차 매수 타점 (-30% ~ -50%)
-                        </span>
-                    </div>
-                </div>
+        <!-- 1. Large Touch-Optimized Ticker Selector Card -->
+        <section class="bg-[#0d131f] border border-slate-800 rounded-2xl p-3.5 shadow-xl space-y-2">
+            <label for="stockSelector" class="text-xs font-bold text-slate-300 flex items-center justify-between">
+                <span class="flex items-center gap-1.5">
+                    <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-400"></i>
+                    종목 선택 (미국 / 한국 / 일본 20종목)
+                </span>
+                <span id="marketBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono border border-slate-700">
+                    USD ($)
+                </span>
+            </label>
 
-                <!-- 1) TradingView Advanced Embed Widget View -->
-                <div id="tradingview-container" class="flex-1 w-full h-full min-h-[580px] rounded-xl overflow-hidden">
-                    <div class="tradingview-widget-container h-full w-full">
-                        <div id="tradingview_widget" class="h-full w-full" style="height: 580px;"></div>
-                    </div>
-                </div>
-
-                <!-- 2) Lightweight Charts with Direct Horizontal Lines Overlay View (Initially hidden) -->
-                <div id="lightweight-container" class="hidden flex-1 w-full h-[580px] rounded-xl relative overflow-hidden bg-[#111827]">
-                    <div id="lw-chart" class="w-full h-full"></div>
-                    <div class="absolute top-3 left-3 z-10 bg-slate-900/90 backdrop-blur px-3 py-2 rounded-lg border border-slate-700 text-xs shadow-lg space-y-1">
-                        <div class="font-bold text-white flex items-center gap-1.5">
-                            <i data-lucide="crosshair" class="w-3.5 h-3.5 text-blue-400"></i>
-                            가격대별 매수 지점 오버레이 뷰
-                        </div>
-                        <p class="text-[11px] text-slate-400">전고점 대비 각 타점 수평선이 인터랙티브하게 반영됩니다.</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Bottom Quick Summary Bar -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div class="bg-slate-900/90 border border-slate-800/80 rounded-xl p-3 flex flex-col">
-                    <span class="text-[11px] font-semibold text-slate-400">기준 전고점 (ATH)</span>
-                    <span id="cardAth" class="text-base font-extrabold font-mono text-amber-400 mt-1">$157.50</span>
-                    <span class="text-[10px] text-slate-500 mt-0.5">최고가 기준 (0%)</span>
-                </div>
-                <div class="bg-slate-900/90 border border-blue-900/40 rounded-xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-blue-400">1차 매수 (-30%)</span>
-                        <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.2 rounded font-bold">15%</span>
-                    </div>
-                    <span id="cardLv1" class="text-base font-extrabold font-mono text-white mt-1">$110.25</span>
-                    <span class="text-[10px] text-slate-400 mt-0.5">첫 조정 진입 구간</span>
-                </div>
-                <div class="bg-slate-900/90 border border-cyan-900/40 rounded-xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-cyan-400">2차 매수 (-35%)</span>
-                        <span class="text-[10px] bg-cyan-500/20 text-cyan-300 px-1.5 py-0.2 rounded font-bold">20%</span>
-                    </div>
-                    <span id="cardLv2" class="text-base font-extrabold font-mono text-white mt-1">$102.38</span>
-                    <span class="text-[10px] text-slate-400 mt-0.5">중기 지지선 매수</span>
-                </div>
-                <div class="bg-slate-900/90 border border-emerald-900/40 rounded-xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-emerald-400">3차 매수 (-40%)</span>
-                        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded font-bold">20%</span>
-                    </div>
-                    <span id="cardLv3" class="text-base font-extrabold font-mono text-white mt-1">$94.50</span>
-                    <span class="text-[10px] text-slate-400 mt-0.5">강력 밸류에이션 구간</span>
-                </div>
-                <div class="bg-slate-900/90 border border-purple-900/40 rounded-xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-purple-400">4차 매수 (-45%)</span>
-                        <span class="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded font-bold">25%</span>
-                    </div>
-                    <span id="cardLv4" class="text-base font-extrabold font-mono text-white mt-1">$86.63</span>
-                    <span class="text-[10px] text-slate-400 mt-0.5">공포 과매도 지점</span>
-                </div>
-                <div class="bg-slate-900/90 border border-rose-900/40 rounded-xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-rose-400">5차 매수 (-50%)</span>
-                        <span class="text-[10px] bg-rose-500/20 text-rose-300 px-1.5 py-0.2 rounded font-bold">20%</span>
-                    </div>
-                    <span id="cardLv5" class="text-base font-extrabold font-mono text-white mt-1">$78.75</span>
-                    <span class="text-[10px] text-slate-400 mt-0.5">바닥 패닉셀 담기</span>
+            <div class="relative">
+                <select id="stockSelector" class="w-full h-12 bg-slate-800/90 text-white font-bold text-sm rounded-xl pl-3.5 pr-10 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition cursor-pointer">
+                    <optgroup label="🇺🇸 미국 주식 (USD - $)">
+                        <option value="MU" selected>MU • Micron Technology (마이크론)</option>
+                        <option value="NVDA">NVDA • Nvidia (엔비디아)</option>
+                        <option value="GOOGL">GOOGL • Alphabet (구글/알파벳)</option>
+                        <option value="PLTR">PLTR • Palantir (팔란티어)</option>
+                        <option value="VICR">VICR • Vicor (바이코)</option>
+                        <option value="DIS">DIS • Walt Disney (월트디즈니)</option>
+                        <option value="VST">VST • Vistra (비스트라)</option>
+                        <option value="RBLX">RBLX • Roblox (로블록스)</option>
+                        <option value="WMB">WMB • Williams Companies (윌리엄스)</option>
+                        <option value="TT">TT • Trane Technologies (트레인 테크)</option>
+                        <option value="CRCL">CRCL • Circle Internet Financial (서클)</option>
+                    </optgroup>
+                    <optgroup label="🇰🇷 한국 주식 (KRW - ₩)">
+                        <option value="005930.KS">005930.KS • 삼성전자</option>
+                        <option value="000660.KS">000660.KS • SK하이닉스</option>
+                        <option value="207940.KS">207940.KS • 삼성바이오로직스</option>
+                        <option value="012330.KS">012330.KS • 현대모비스</option>
+                        <option value="042660.KS">042660.KS • 한화오션</option>
+                        <option value="028260.KS">028260.KS • 삼성물산</option>
+                        <option value="001040.KS">001040.KS • CJ</option>
+                    </optgroup>
+                    <optgroup label="🇯🇵 일본 주식 (JPY - ¥)">
+                        <option value="186A.T">186A.T • Astroscale Holdings (아스트로스케일)</option>
+                        <option value="2638.T">2638.T • Global X Japan Robotics & AI ETF</option>
+                    </optgroup>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                    <i data-lucide="chevron-down" class="w-5 h-5"></i>
                 </div>
             </div>
-
         </section>
 
-        <!-- Right: Expert Strategy & Buy-Level Calculation Table (Col 3 / 12) -->
-        <aside class="xl:col-span-3 flex flex-col gap-4">
-            
-            <!-- Strategy Detail Table Card -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl flex flex-col">
-                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-blue-400"></i>
-                        <h3 class="text-sm font-bold text-white">분할 매수 타점 명세서</h3>
-                    </div>
-                    <span class="text-[11px] text-slate-400 font-mono font-semibold">5-Stage Grid</span>
+        <!-- 2. Real-time Price & Peak Info Bar -->
+        <section class="grid grid-cols-3 gap-2">
+            <!-- Current Price -->
+            <div class="bg-[#0d131f] border border-slate-800/90 rounded-xl p-2.5 flex flex-col justify-between shadow-md">
+                <span class="text-[10px] text-slate-400 font-medium">현재가</span>
+                <span id="currentPriceDisplay" class="text-sm font-extrabold font-mono text-white mt-1">$108.40</span>
+                <span id="currentChangeRate" class="text-[10px] font-mono font-semibold text-emerald-400 mt-0.5">-31.17% (조정)</span>
+            </div>
+
+            <!-- Peak (ATH) Price -->
+            <div class="bg-[#0d131f] border border-amber-900/40 rounded-xl p-2.5 flex flex-col justify-between shadow-md bg-gradient-to-b from-amber-500/5 to-transparent">
+                <span class="text-[10px] text-amber-400/90 font-medium flex items-center gap-1">
+                    <i data-lucide="crown" class="w-3 h-3"></i> 52주 전고점
+                </span>
+                <span id="athPriceDisplay" class="text-sm font-extrabold font-mono text-amber-400 mt-1">$157.50</span>
+                <span class="text-[10px] text-slate-400 mt-0.5">기준점 (0%)</span>
+            </div>
+
+            <!-- Nearest Target -->
+            <div class="bg-[#0d131f] border border-blue-900/40 rounded-xl p-2.5 flex flex-col justify-between shadow-md bg-gradient-to-b from-blue-500/5 to-transparent">
+                <span class="text-[10px] text-blue-400 font-medium">다음 매수 타점</span>
+                <span id="nextTargetDisplay" class="text-sm font-extrabold font-mono text-blue-400 mt-1">$102.38</span>
+                <span id="nextTargetGap" class="text-[10px] font-mono font-semibold text-slate-300 mt-0.5">-5.55% 추가하락</span>
+            </div>
+        </section>
+
+        <!-- 3. Responsive Mobile Interactive Chart Container -->
+        <section class="bg-[#0d131f] border border-slate-800 rounded-2xl p-3 shadow-2xl relative overflow-hidden">
+            <!-- Chart Header & Legend -->
+            <div class="flex items-center justify-between pb-2 mb-1 border-b border-slate-800/80">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="chartSymbolTitle" class="text-xs font-bold font-mono text-white">MU (1D)</span>
                 </div>
-
-                <p class="text-xs text-slate-400 leading-relaxed mb-4">
-                    전고점에서 급락 시 일시적 패닉셀에 휩쓸리지 않고, 통계적 지지선에 맞춰 정밀하게 분할 매수 집행을 위한 타점표입니다.
-                </p>
-
-                <!-- Detailed Table -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
-                        <thead>
-                            <tr class="text-slate-400 border-b border-slate-800 bg-slate-800/40 font-semibold">
-                                <th class="py-2.5 px-2 rounded-l-lg">단계</th>
-                                <th class="py-2.5 px-2">하락률</th>
-                                <th class="py-2.5 px-2 text-right">매수 가격</th>
-                                <th class="py-2.5 px-2 rounded-r-lg text-right">권장 비중</th>
-                            </tr>
-                        </thead>
-                        <tbody id="levelsTableBody" class="divide-y divide-slate-800/60 font-mono">
-                            <!-- Populated via Javascript -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Total Portfolio Capital Allocation Calculator -->
-                <div class="mt-5 pt-4 border-t border-slate-800/80">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                            <i data-lucide="calculator" class="w-3.5 h-3.5 text-emerald-400"></i>
-                            투자 예산 시뮬레이션
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-2 bg-slate-800/70 p-2 rounded-lg border border-slate-700">
-                        <span class="text-xs text-slate-400">총 투자금:</span>
-                        <div class="relative flex-1">
-                            <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
-                            <input id="totalCapitalInput" type="number" value="10000" step="500" 
-                                class="w-full bg-transparent text-sm font-bold font-mono text-emerald-400 pl-5 pr-1 focus:outline-none" />
-                        </div>
-                    </div>
-
-                    <div id="capitalAllocationSummary" class="mt-3 space-y-2 text-xs">
-                        <!-- Populated via Javascript -->
-                    </div>
-                </div>
-
-                <!-- Export / Copy Action -->
-                <div class="mt-5 pt-4 border-t border-slate-800 flex gap-2">
-                    <button id="copyPlanBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700 transition">
-                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                        타점 복사
-                    </button>
-                    <button id="printBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center border border-slate-700 transition" title="인쇄 / PDF 저장">
-                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                    </button>
+                <div class="flex items-center gap-1 text-[9px] text-slate-400 font-medium">
+                    <span class="inline-block w-2 h-0.5 bg-amber-400"></span> 전고점
+                    <span class="inline-block w-2 h-0.5 bg-blue-500 ml-1"></span> -30%~-50% 분할선
                 </div>
             </div>
 
-            <!-- Strategy Checklist & Rule Card -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-3">
-                <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <i data-lucide="info" class="w-3.5 h-3.5"></i>
-                    전문가 운용 원칙 (Execution Rules)
-                </h4>
-                <ul class="text-xs text-slate-300 space-y-2 leading-relaxed list-disc list-inside">
-                    <li><strong class="text-white">기계적 분할:</strong> 감정을 배제하고 사전 정의된 하락률 도달 시에만 지정가 매수를 체결합니다.</li>
-                    <li><strong class="text-white">현금 비중 관리:</strong> 5차 매수(-50%) 이후에도 비상 예비 현금 10~20%를 항시 유지합니다.</li>
-                    <li><strong class="text-white">반등 시 리밸런싱:</strong> 매수 평단가 대비 +15%~25% 반등 시 부분 익절을 통해 현금을 재확보합니다.</li>
-                </ul>
+            <!-- Lightweight Charts Container -->
+            <div class="w-full relative">
+                <div id="chartContainer" class="w-full h-[320px] rounded-xl overflow-hidden touch-pan-x"></div>
+                <!-- Watermark Info -->
+                <div class="absolute bottom-2 left-2 pointer-events-none text-[9px] font-mono text-slate-600">
+                    Lightweight Charts • 1Y Daily Candlestick
+                </div>
             </div>
 
-        </aside>
+            <!-- Chart Interactive Hint -->
+            <div class="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400">
+                <span class="flex items-center gap-1">
+                    <i data-lucide="touchpad" class="w-3 h-3 text-slate-500"></i>
+                    터치 드래그로 이동 & 핀치 줌 지원
+                </span>
+                <button id="resetChartBtn" class="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-0.5">
+                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 차트 원위치
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. 5-Stage Buy Level Mobile Cards List -->
+        <section class="space-y-2">
+            <div class="flex items-center justify-between px-1">
+                <h3 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i>
+                    5단계 분할 매수 타점표
+                </h3>
+                <span class="text-[10px] text-slate-400">전고점 대비 하락 기준</span>
+            </div>
+
+            <!-- Card Items Container (Populated via JS) -->
+            <div id="levelsCardsContainer" class="space-y-2">
+                <!-- Dynamically generated cards -->
+            </div>
+        </section>
+
+        <!-- 5. Strategy Rule Card -->
+        <section class="bg-gradient-to-br from-slate-900 to-[#0d131f] border border-slate-800/90 rounded-2xl p-3.5 shadow-lg space-y-2">
+            <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span>전문가 분할 매수 운용 가이드</span>
+            </div>
+            <ul class="text-[11px] text-slate-300 space-y-1.5 leading-relaxed">
+                <li class="flex items-start gap-1.5">
+                    <span class="text-amber-400 font-bold">•</span>
+                    <span><strong>기계적 분할 집행:</strong> 감정을 배제하고 사전 정의된 -30% ~ -50% 가격 도달 시에만 분할 매수를 체결합니다.</span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                    <span class="text-blue-400 font-bold">•</span>
+                    <span><strong>괴리율 확인:</strong> 현재가와의 괴리율을 체크하여 도달 완료 여부를 실시간으로 판별합니다.</span>
+                </li>
+            </ul>
+        </section>
 
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-800/80 bg-[#111827] py-3 px-6 text-center text-xs text-slate-500">
-        <p>Pro Entry Point Stock Strategy Analyzer • Micron (MU) Default Mode • All Calculations are for Analytical Purposes</p>
+    <footer class="mt-8 border-t border-slate-800/60 py-4 px-4 text-center text-[10px] text-slate-500">
+        <p>Pro Entry Point Mobile System • Multi-Currency Support (USD, KRW, JPY)</p>
     </footer>
 
-    <!-- Script Logic -->
+    <!-- Logic Script -->
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Level Configurations
-        const LEVELS_CONFIG = [
-            { id: 1, name: '1차 매수 지점', dropRate: 0.30, dropPctText: '-30%', weight: 0.15, color: '#3b82f6', desc: '초기 지지선 진입' },
-            { id: 2, name: '2차 매수 지점', dropRate: 0.35, dropPctText: '-35%', weight: 0.20, color: '#06b6d4', desc: '중기 지지선 진입' },
-            { id: 3, name: '3차 매수 지점', dropRate: 0.40, dropPctText: '-40%', weight: 0.20, color: '#10b981', desc: '가치평가 저평가 구간' },
-            { id: 4, name: '4차 매수 지점', dropRate: 0.45, dropPctText: '-45%', weight: 0.25, color: '#8b5cf6', desc: '패닉셀 과매도 구간' },
-            { id: 5, name: '5차 매수 지점', dropRate: 0.50, dropPctText: '-50%', weight: 0.20, color: '#ef4444', desc: '최종 바닥 타점' }
+        // 20 Default Stocks Configuration with Realistic Price Ranges & Currencies
+        const STOCKS_DATABASE = {
+            // US Stocks (USD)
+            'MU': { name: 'Micron Technology (마이크론)', currency: '$', locale: 'en-US', basePrice: 157.50, volatility: 0.022, isKRW: false, isJPY: false },
+            'NVDA': { name: 'Nvidia (엔비디아)', currency: '$', locale: 'en-US', basePrice: 140.76, volatility: 0.025, isKRW: false, isJPY: false },
+            'GOOGL': { name: 'Alphabet (구글)', currency: '$', locale: 'en-US', basePrice: 191.75, volatility: 0.018, isKRW: false, isJPY: false },
+            'PLTR': { name: 'Palantir (팔란티어)', currency: '$', locale: 'en-US', basePrice: 44.20, volatility: 0.028, isKRW: false, isJPY: false },
+            'VICR': { name: 'Vicor (바이코)', currency: '$', locale: 'en-US', basePrice: 92.40, volatility: 0.030, isKRW: false, isJPY: false },
+            'DIS': { name: 'Walt Disney (디즈니)', currency: '$', locale: 'en-US', basePrice: 123.74, volatility: 0.016, isKRW: false, isJPY: false },
+            'VST': { name: 'Vistra (비스트라)', currency: '$', locale: 'en-US', basePrice: 143.80, volatility: 0.032, isKRW: false, isJPY: false },
+            'RBLX': { name: 'Roblox (로블록스)', currency: '$', locale: 'en-US', basePrice: 62.50, volatility: 0.029, isKRW: false, isJPY: false },
+            'WMB': { name: 'Williams Companies (윌리엄스)', currency: '$', locale: 'en-US', basePrice: 58.90, volatility: 0.015, isKRW: false, isJPY: false },
+            'TT': { name: 'Trane Technologies (트레인)', currency: '$', locale: 'en-US', basePrice: 405.60, volatility: 0.017, isKRW: false, isJPY: false },
+            'CRCL': { name: 'Circle Internet Financial (서클)', currency: '$', locale: 'en-US', basePrice: 48.00, volatility: 0.035, isKRW: false, isJPY: false },
+
+            // Korean Stocks (KRW)
+            '005930.KS': { name: '삼성전자', currency: '₩', locale: 'ko-KR', basePrice: 88800, volatility: 0.015, isKRW: true, isJPY: false },
+            '000660.KS': { name: 'SK하이닉스', currency: '₩', locale: 'ko-KR', basePrice: 248500, volatility: 0.024, isKRW: true, isJPY: false },
+            '207940.KS': { name: '삼성바이오로직스', currency: '₩', locale: 'ko-KR', basePrice: 1120000, volatility: 0.018, isKRW: true, isJPY: false },
+            '012330.KS': { name: '현대모비스', currency: '₩', locale: 'ko-KR', basePrice: 265000, volatility: 0.017, isKRW: true, isJPY: false },
+            '042660.KS': { name: '한화오션', currency: '₩', locale: 'ko-KR', basePrice: 41800, volatility: 0.030, isKRW: true, isJPY: false },
+            '028260.KS': { name: '삼성물산', currency: '₩', locale: 'ko-KR', basePrice: 172000, volatility: 0.016, isKRW: true, isJPY: false },
+            '001040.KS': { name: 'CJ', currency: '₩', locale: 'ko-KR', basePrice: 142500, volatility: 0.019, isKRW: true, isJPY: false },
+
+            // Japanese Stocks (JPY)
+            '186A.T': { name: 'Astroscale Holdings', currency: '¥', locale: 'ja-JP', basePrice: 1280, volatility: 0.035, isKRW: false, isJPY: true },
+            '2638.T': { name: 'Global X Japan Robotics & AI ETF', currency: '¥', locale: 'ja-JP', basePrice: 3450, volatility: 0.020, isKRW: false, isJPY: true }
+        };
+
+        // 5-Stage Buy Level Criteria (Gradual visual urgency: Blue -> Cyan -> Emerald -> Orange -> Crimson)
+        const BUY_LEVELS = [
+            { id: 1, name: '1차 매수', dropRate: 0.30, dropPctText: '-30%', color: '#3b82f6', badgeBg: 'bg-blue-500/20 text-blue-400 border-blue-500/30', cardBorder: 'border-blue-900/40', desc: '초기 지지선 진입' },
+            { id: 2, name: '2차 매수', dropRate: 0.35, dropPctText: '-35%', color: '#06b6d4', badgeBg: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30', cardBorder: 'border-cyan-900/40', desc: '중기 지지선 진입' },
+            { id: 3, name: '3차 매수', dropRate: 0.40, dropPctText: '-40%', color: '#10b981', badgeBg: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', cardBorder: 'border-emerald-900/40', desc: '가치평가 저평가 구간' },
+            { id: 4, name: '4차 매수', dropRate: 0.45, dropPctText: '-45%', color: '#f97316', badgeBg: 'bg-orange-500/20 text-orange-400 border-orange-500/30', cardBorder: 'border-orange-900/40', desc: '패닉셀 과매도 구간' },
+            { id: 5, name: '5차 매수', dropRate: 0.50, dropPctText: '-50%', color: '#ef4444', badgeBg: 'bg-rose-500/20 text-rose-400 border-rose-500/30', cardBorder: 'border-rose-900/40', desc: '최종 바닥 타점' }
         ];
 
-        // State Variables
-        let currentTicker = 'NASDAQ:MU';
-        let peakPrice = 157.50;
-        let totalCapital = 10000;
-        let tvWidget = null;
-        let lwChart = null;
-        let candlestickSeries = null;
-        let priceLines = [];
+        // Global Chart Instance State
+        let chart = null;
+        let candleSeries = null;
+        let activePriceLines = [];
+        let currentCandles = [];
+        let selectedTicker = 'MU';
 
-        // DOM Elements
-        const tickerInput = document.getElementById('tickerInput');
-        const applyTickerBtn = document.getElementById('applyTickerBtn');
-        const peakPriceInput = document.getElementById('peakPriceInput');
-        const recalcBtn = document.getElementById('recalcBtn');
-        const totalCapitalInput = document.getElementById('totalCapitalInput');
-        const levelsTableBody = document.getElementById('levelsTableBody');
-        const capitalAllocationSummary = document.getElementById('capitalAllocationSummary');
-        const chartTickerTitle = document.getElementById('chartTickerTitle');
-
-        const tabTradingView = document.getElementById('tabTradingView');
-        const tabCustomOverlay = document.getElementById('tabCustomOverlay');
-        const tvContainer = document.getElementById('tradingview-container');
-        const lwContainer = document.getElementById('lightweight-container');
-
-        // TradingView Widget Loader
-        function loadTradingViewWidget(symbol) {
-            tvContainer.innerHTML = '<div class="tradingview-widget-container h-full w-full"><div id="tradingview_widget" class="h-full w-full" style="height: 580px;"></div></div>';
-            
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = 'https://s3.tradingview.com/tv.js';
-            script.async = true;
-            script.onload = () => {
-                if (typeof TradingView !== 'undefined') {
-                    tvWidget = new TradingView.widget({
-                        "autosize": true,
-                        "symbol": symbol,
-                        "interval": "D",
-                        "timezone": "Etc/UTC",
-                        "theme": "dark",
-                        "style": "1",
-                        "locale": "kr",
-                        "toolbar_bg": "#111827",
-                        "enable_publishing": false,
-                        "allow_symbol_change": true,
-                        "container_id": "tradingview_widget",
-                        "studies": [
-                            "MASimple@tv-basicstudies",
-                            "RSI@tv-basicstudies"
-                        ]
-                    });
-                }
-            };
-            tvContainer.appendChild(script);
+        // Currency Formatter Helper
+        function formatPrice(val, stockMeta) {
+            if (stockMeta.isKRW || stockMeta.isJPY) {
+                return `${stockMeta.currency}${Math.round(val).toLocaleString()}`;
+            }
+            return `${stockMeta.currency}${val.toFixed(2)}`;
         }
 
-        // Calculate and Update UI Elements
-        function calculateLevels() {
-            peakPrice = parseFloat(peakPriceInput.value) || 157.50;
-            totalCapital = parseFloat(totalCapitalInput.value) || 10000;
+        // Pseudo-random deterministic generator for consistent 1-year candlestick history
+        function generate1YearMockData(ticker) {
+            const meta = STOCKS_DATABASE[ticker];
+            const peak = meta.basePrice;
+            const candles = [];
 
-            // Update Summary Cards
-            document.getElementById('cardAth').textContent = `$${peakPrice.toFixed(2)}`;
+            // 250 trading days (~1 calendar year)
+            const totalDays = 250;
+            const now = new Date();
+            let date = new Date(now.getTime() - totalDays * 24 * 60 * 60 * 1000);
 
-            const calculatedLevels = LEVELS_CONFIG.map(lvl => {
-                const buyPrice = peakPrice * (1 - lvl.dropRate);
-                const budget = totalCapital * lvl.weight;
-                const shares = Math.floor(budget / buyPrice);
-                return {
-                    ...lvl,
-                    buyPrice,
-                    budget,
-                    shares
-                };
-            });
+            // Starting from ~60% of peak
+            let currentPrice = peak * 0.62;
 
-            // Update Cards
-            calculatedLevels.forEach(lvl => {
-                const cardEl = document.getElementById(`cardLv${lvl.id}`);
-                if (cardEl) {
-                    cardEl.textContent = `$${lvl.buyPrice.toFixed(2)}`;
+            // Seed based on ticker characters
+            let seed = 0;
+            for (let i = 0; i < ticker.length; i++) {
+                seed += ticker.charCodeAt(i);
+            }
+            function random() {
+                const x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            }
+
+            let highestHigh = 0;
+            let peakIndex = Math.floor(totalDays * 0.72); // Peak reached at around 72% point
+
+            for (let i = 0; i < totalDays; i++) {
+                // Skip weekends
+                if (date.getDay() === 0) date.setDate(date.getDate() + 1);
+                if (date.getDay() === 6) date.setDate(date.getDate() + 2);
+
+                const dateStr = date.toISOString().split('T')[0];
+
+                // Drift towards peak before peakIndex, then drift downwards (pullback)
+                let drift = 0;
+                if (i < peakIndex) {
+                    drift = (peak - currentPrice) * (0.02 + random() * 0.02);
+                } else if (i === peakIndex) {
+                    currentPrice = peak; // Guarantee exact ATH match
+                } else {
+                    // Pullback to ~ -32% from peak
+                    const targetDropPrice = peak * 0.68;
+                    drift = (targetDropPrice - currentPrice) * (0.025 + random() * 0.02);
                 }
-            });
 
-            // Update Detailed Table
-            levelsTableBody.innerHTML = '';
-            
-            // ATH Row
-            const athRow = document.createElement('tr');
-            athRow.className = 'text-amber-300 font-semibold bg-amber-500/10';
-            athRow.innerHTML = `
-                <td class="py-2.5 px-2 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> 전고점 (ATH)</td>
-                <td class="py-2.5 px-2">기준가 (0%)</td>
-                <td class="py-2.5 px-2 text-right font-bold">$${peakPrice.toFixed(2)}</td>
-                <td class="py-2.5 px-2 text-right text-slate-400">-</td>
-            `;
-            levelsTableBody.appendChild(athRow);
+                const dailyFluctuation = currentPrice * meta.volatility * (random() - 0.48);
+                const open = currentPrice;
+                let close = open + drift + dailyFluctuation;
 
-            // 1~5 levels
-            calculatedLevels.forEach(lvl => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/50 transition';
-                tr.innerHTML = `
-                    <td class="py-2.5 px-2 flex items-center gap-1.5 text-slate-200">
-                        <span class="w-2 h-2 rounded-full" style="background-color: ${lvl.color}"></span>
-                        ${lvl.name}
-                    </td>
-                    <td class="py-2.5 px-2 font-bold" style="color: ${lvl.color}">${lvl.dropPctText}</td>
-                    <td class="py-2.5 px-2 text-right font-bold text-white">$${lvl.buyPrice.toFixed(2)}</td>
-                    <td class="py-2.5 px-2 text-right text-slate-300 font-semibold">${(lvl.weight * 100).toFixed(0)}%</td>
-                `;
-                levelsTableBody.appendChild(tr);
-            });
+                // Restrict close around peak
+                if (close > peak) close = peak * (0.995 + random() * 0.005);
 
-            // Update Capital Allocation Summary
-            capitalAllocationSummary.innerHTML = calculatedLevels.map(lvl => `
-                <div class="flex items-center justify-between p-2 rounded bg-slate-800/40 border border-slate-800 text-slate-300">
-                    <span class="font-medium flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${lvl.color}"></span>
-                        ${lvl.name} ($${lvl.buyPrice.toFixed(2)})
-                    </span>
-                    <span class="font-mono font-bold text-white">
-                        $${lvl.budget.toLocaleString()} <span class="text-[10px] text-slate-400 font-normal">(${lvl.shares}주)</span>
-                    </span>
-                </div>
-            `).join('');
+                const high = Math.max(open, close) + currentPrice * meta.volatility * (random() * 0.8);
+                const low = Math.min(open, close) - currentPrice * meta.volatility * (random() * 0.8);
 
-            // Update Lightweight Charts if active
-            updateLightweightChartLines(calculatedLevels);
+                const candleHigh = i === peakIndex ? peak : high;
+
+                candles.push({
+                    time: dateStr,
+                    open: parseFloat(open.toFixed(meta.isKRW ? 0 : 2)),
+                    high: parseFloat(candleHigh.toFixed(meta.isKRW ? 0 : 2)),
+                    low: parseFloat(low.toFixed(meta.isKRW ? 0 : 2)),
+                    close: parseFloat(close.toFixed(meta.isKRW ? 0 : 2))
+                });
+
+                currentPrice = close;
+                date.setDate(date.getDate() + 1);
+            }
+
+            return candles;
         }
 
-        // Initialize Lightweight Charts
-        function initLightweightChart() {
-            const chartDiv = document.getElementById('lw-chart');
-            chartDiv.innerHTML = '';
+        // Initialize Lightweight Charts Container
+        function initChart() {
+            const container = document.getElementById('chartContainer');
+            container.innerHTML = '';
 
-            lwChart = LightweightCharts.createChart(chartDiv, {
-                width: chartDiv.clientWidth || 800,
-                height: 580,
+            chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth || 360,
+                height: 320,
                 layout: {
-                    background: { color: '#0f172a' },
+                    background: { color: '#0d131f' },
                     textColor: '#94a3b8',
+                    fontSize: 10,
                 },
                 grid: {
-                    vertLines: { color: '#1e293b' },
-                    horzLines: { color: '#1e293b' },
+                    vertLines: { color: '#182235' },
+                    horzLines: { color: '#182235' },
                 },
                 crosshair: {
                     mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: {
+                        color: '#475569',
+                        width: 1,
+                        style: LightweightCharts.LineStyle.Dashed,
+                    },
+                    horzLine: {
+                        color: '#475569',
+                        width: 1,
+                        style: LightweightCharts.LineStyle.Dashed,
+                    }
                 },
                 rightPriceScale: {
-                    borderColor: '#334155',
+                    borderColor: '#222f46',
+                    scaleMargins: {
+                        top: 0.15,
+                        bottom: 0.15,
+                    },
                 },
                 timeScale: {
-                    borderColor: '#334155',
+                    borderColor: '#222f46',
+                    fixLeftEdge: true,
+                    fixRightEdge: true,
                 },
+                handleScroll: {
+                    mouseWheel: true,
+                    pressedMouseMove: true,
+                    horzTouchDrag: true,
+                    vertTouchDrag: false
+                },
+                handleScale: {
+                    axisPressedMouseMove: true,
+                    pinch: true,
+                }
             });
 
-            candlestickSeries = lwChart.addCandlestickSeries({
+            candleSeries = chart.addCandlestickSeries({
                 upColor: '#10b981',
                 downColor: '#ef4444',
-                borderVisible: false,
+                borderUpColor: '#10b981',
+                borderDownColor: '#ef4444',
                 wickUpColor: '#10b981',
                 wickDownColor: '#ef4444',
             });
 
-            // Generate representative candlestick historical curve for MU around ATH
-            const sampleCandles = generateHistoricalCandles(peakPrice);
-            candlestickSeries.setData(sampleCandles);
-
-            window.addEventListener('resize', () => {
-                if (lwChart && lwContainer.offsetParent !== null) {
-                    lwChart.applyOptions({ width: lwContainer.clientWidth });
-                }
+            // Mobile Resize Observer for Perfect Fit
+            const resizeObserver = new ResizeObserver(entries => {
+                if (entries.length === 0 || !chart) return;
+                const { width } = entries[0].contentRect;
+                chart.applyOptions({ width: width });
             });
+            resizeObserver.observe(container);
         }
 
-        function updateLightweightChartLines(calculatedLevels) {
-            if (!candlestickSeries) return;
+        // Render Stock Data & Horizontal Buy Lines
+        function renderStock(ticker) {
+            selectedTicker = ticker;
+            const meta = STOCKS_DATABASE[ticker];
+            
+            // 1. Generate & Load Candlestick Data
+            currentCandles = generate1YearMockData(ticker);
+            candleSeries.setData(currentCandles);
 
-            // Remove existing price lines
-            priceLines.forEach(line => candlestickSeries.removePriceLine(line));
-            priceLines = [];
+            // 2. Automatically Find the Highest High (ATH / Peak)
+            let peakPrice = 0;
+            currentCandles.forEach(c => {
+                if (c.high > peakPrice) peakPrice = c.high;
+            });
 
-            // Add ATH line
-            const athLine = candlestickSeries.createPriceLine({
+            const lastCandle = currentCandles[currentCandles.length - 1];
+            const currentPrice = lastCandle.close;
+            const currentDropFromPeak = ((currentPrice - peakPrice) / peakPrice) * 100;
+
+            // 3. Update Market Badge & Titles
+            document.getElementById('marketBadge').textContent = `${meta.currency} (${meta.locale.split('-')[1] || 'USD'})`;
+            document.getElementById('chartSymbolTitle').textContent = `${ticker} (1D)`;
+            document.getElementById('headerAthPrice').textContent = formatPrice(peakPrice, meta);
+            document.getElementById('athPriceDisplay').textContent = formatPrice(peakPrice, meta);
+            document.getElementById('currentPriceDisplay').textContent = formatPrice(currentPrice, meta);
+
+            const changeRateEl = document.getElementById('currentChangeRate');
+            changeRateEl.textContent = `${currentDropFromPeak.toFixed(2)}% (전고대비)`;
+            changeRateEl.className = currentDropFromPeak >= 0 
+                ? "text-[10px] font-mono font-semibold text-emerald-400 mt-0.5"
+                : "text-[10px] font-mono font-semibold text-rose-400 mt-0.5";
+
+            // 4. Clear Old Price Lines & Create New Horizontal Lines
+            activePriceLines.forEach(line => candleSeries.removePriceLine(line));
+            activePriceLines = [];
+
+            // Add ATH Line (Gold Solid Line)
+            const athLine = candleSeries.createPriceLine({
                 price: peakPrice,
                 color: '#f59e0b',
                 lineWidth: 2,
                 lineStyle: LightweightCharts.LineStyle.Solid,
                 axisLabelVisible: true,
-                title: `기준 전고점 (ATH): $${peakPrice.toFixed(2)}`,
+                title: `전고점 (${formatPrice(peakPrice, meta)})`,
             });
-            priceLines.push(athLine);
+            activePriceLines.push(athLine);
 
-            // Add Buy Level Lines
-            calculatedLevels.forEach(lvl => {
-                const line = candlestickSeries.createPriceLine({
-                    price: lvl.buyPrice,
+            // Calculate 5 Buy Levels & Add Lines
+            let nextTarget = null;
+            const calculatedLevels = BUY_LEVELS.map(lvl => {
+                const targetPrice = peakPrice * (1 - lvl.dropRate);
+                const gapFromCurrent = ((targetPrice - currentPrice) / currentPrice) * 100;
+                const isReached = currentPrice <= targetPrice;
+
+                if (!nextTarget && !isReached) {
+                    nextTarget = { ...lvl, targetPrice, gapFromCurrent };
+                }
+
+                // Create Lightweight Chart Horizontal Line
+                const pLine = candleSeries.createPriceLine({
+                    price: targetPrice,
                     color: lvl.color,
-                    lineWidth: 2,
+                    lineWidth: 1.5,
                     lineStyle: LightweightCharts.LineStyle.Dashed,
                     axisLabelVisible: true,
-                    title: `${lvl.name} (${lvl.dropPctText}): $${lvl.buyPrice.toFixed(2)}`,
+                    title: `${lvl.dropPctText} (${formatPrice(targetPrice, meta)})`,
                 });
-                priceLines.push(line);
+                activePriceLines.push(pLine);
+
+                return {
+                    ...lvl,
+                    targetPrice,
+                    gapFromCurrent,
+                    isReached
+                };
             });
+
+            // Update Next Target Box in Header Bar
+            const nextTargetDisplay = document.getElementById('nextTargetDisplay');
+            const nextTargetGap = document.getElementById('nextTargetGap');
+            if (nextTarget) {
+                nextTargetDisplay.textContent = formatPrice(nextTarget.targetPrice, meta);
+                nextTargetGap.textContent = `${nextTarget.gapFromCurrent.toFixed(1)}% 추가하락`;
+                nextTargetGap.className = "text-[10px] font-mono font-semibold text-orange-400 mt-0.5";
+            } else {
+                nextTargetDisplay.textContent = "전 구간 도달";
+                nextTargetGap.textContent = "분할 매수 완료";
+                nextTargetGap.className = "text-[10px] font-mono font-semibold text-emerald-400 mt-0.5";
+            }
+
+            // 5. Render Mobile Buy Level Cards
+            renderLevelCards(calculatedLevels, meta, currentPrice);
+
+            // 6. Fit Chart TimeScale
+            chart.timeScale().fitContent();
         }
 
-        // Mock Candle Generator for clean visual overlay demo
-        function generateHistoricalCandles(peak) {
-            const candles = [];
-            let date = new Date(2024, 0, 1);
-            let price = peak * 0.55;
+        // Render the 5-Stage Mobile Cards
+        function renderLevelCards(levels, meta, currentPrice) {
+            const container = document.getElementById('levelsCardsContainer');
+            container.innerHTML = '';
 
-            for (let i = 0; i < 180; i++) {
-                const timeStr = date.toISOString().split('T')[0];
-                const delta = (Math.random() - 0.46) * 3;
-                let open = price;
-                let close = price + delta;
-                
-                // Climb towards peak in middle, then pull back
-                if (i < 130) {
-                    close += (peak - price) * 0.035;
-                } else {
-                    close -= (price - peak * 0.6) * 0.03;
-                }
+            levels.forEach(lvl => {
+                const card = document.createElement('div');
+                card.className = `bg-[#0d131f] border ${lvl.cardBorder} rounded-xl p-3 shadow-md transition-all hover:bg-slate-800/40`;
 
-                let high = Math.max(open, close) + Math.random() * 2;
-                let low = Math.min(open, close) - Math.random() * 2;
-                if (high > peak) high = peak;
+                const reachedBadge = lvl.isReached 
+                    ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <i data-lucide="check-circle-2" class="w-3 h-3"></i> 도달 완료
+                       </span>`
+                    : `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700">
+                        <i data-lucide="clock" class="w-3 h-3"></i> 대기중 (${lvl.gapFromCurrent.toFixed(1)}%)
+                       </span>`;
 
-                candles.push({ time: timeStr, open, high, low, close });
-                price = close;
-                date.setDate(date.getDate() + 1);
-                if (date.getDay() === 0 || date.getDay() === 6) {
-                    date.setDate(date.getDate() + (date.getDay() === 6 ? 2 : 1));
-                }
-            }
-            return candles;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${lvl.color}"></span>
+                            <span class="text-xs font-bold text-white">${lvl.name}</span>
+                            <span class="text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${lvl.badgeBg}">
+                                ${lvl.dropPctText}
+                            </span>
+                        </div>
+                        ${reachedBadge}
+                    </div>
+
+                    <div class="mt-2.5 flex items-end justify-between border-t border-slate-800/60 pt-2">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block">${lvl.desc}</span>
+                            <span class="text-xs text-slate-300 font-medium mt-0.5 block">
+                                현재가 대비: <span class="font-mono ${lvl.gapFromCurrent <= 0 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${lvl.gapFromCurrent <= 0 ? '통과' : lvl.gapFromCurrent.toFixed(2) + '% 추가 조정'}</span>
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 block">목표 매수가</span>
+                            <span class="text-sm font-extrabold font-mono text-white" style="color: ${lvl.color}">
+                                ${formatPrice(lvl.targetPrice, meta)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
         }
 
         // Event Listeners
-        recalcBtn.addEventListener('click', calculateLevels);
-        peakPriceInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') calculateLevels(); });
-        totalCapitalInput.addEventListener('input', calculateLevels);
+        document.getElementById('stockSelector').addEventListener('change', (e) => {
+            renderStock(e.target.value);
+        });
 
-        applyTickerBtn.addEventListener('click', () => {
-            const rawTicker = tickerInput.value.trim().toUpperCase();
-            if (rawTicker) {
-                currentTicker = rawTicker;
-                chartTickerTitle.textContent = `${currentTicker} (분석 대상)`;
-                loadTradingViewWidget(currentTicker);
+        document.getElementById('resetChartBtn').addEventListener('click', () => {
+            if (chart) {
+                chart.timeScale().fitContent();
             }
         });
 
-        tickerInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') applyTickerBtn.click();
-        });
-
-        // Tab Switching
-        tabTradingView.addEventListener('click', () => {
-            tabTradingView.className = "px-3 py-1 text-xs font-semibold rounded-md bg-blue-600 text-white shadow transition flex items-center gap-1.5";
-            tabCustomOverlay.className = "px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-white transition flex items-center gap-1.5";
-            tvContainer.classList.remove('hidden');
-            lwContainer.classList.add('hidden');
-        });
-
-        tabCustomOverlay.addEventListener('click', () => {
-            tabCustomOverlay.className = "px-3 py-1 text-xs font-semibold rounded-md bg-blue-600 text-white shadow transition flex items-center gap-1.5";
-            tabTradingView.className = "px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-white transition flex items-center gap-1.5";
-            lwContainer.classList.remove('hidden');
-            tvContainer.classList.add('hidden');
-            
-            if (!lwChart) {
-                initLightweightChart();
-            }
-            calculateLevels();
-        });
-
-        // Copy Plan Button
-        document.getElementById('copyPlanBtn').addEventListener('click', () => {
-            const lines = [
-                `[${currentTicker} 전고점 기준 분할 매수 타점 분석]`,
-                `기준 전고점(ATH): $${peakPrice.toFixed(2)}`,
-                `----------------------------------------`,
-                ...LEVELS_CONFIG.map(l => {
-                    const price = (peakPrice * (1 - l.dropRate)).toFixed(2);
-                    return `${l.name} (${l.dropPctText}): $${price} (비중 ${(l.weight*100).toFixed(0)}%)`;
-                })
-            ];
-            navigator.clipboard.writeText(lines.join('\n')).then(() => {
-                alert('매수 타점 계획이 클립보드에 복사되었습니다.');
-            });
-        });
-
-        // Print Button
-        document.getElementById('printBtn').addEventListener('click', () => {
-            window.print();
-        });
-
-        // Initial Load
+        // Initialize on DOM Ready
         window.addEventListener('DOMContentLoaded', () => {
-            loadTradingViewWidget(currentTicker);
-            calculateLevels();
+            initChart();
+            renderStock('MU'); // Default to Micron
         });
     </script>
 </body>
