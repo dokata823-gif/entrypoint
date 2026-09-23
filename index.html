@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>모바일 주식 차트 - 캔들 & 이동평균선(MA)</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Lightweight Charts v4 CDN -->
-    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <title>모바일 주식 차트</title>
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -18,405 +14,135 @@
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background-color: #0b0f17;
+            background-color: #131722;
             color: #d1d4dc;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            touch-action: pan-y;
         }
-        .font-mono {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        header {
+            padding: 8px 12px;
+            background-color: #1e222d;
+            border-bottom: 1px solid #2a2e39;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        input {
+            flex: 1;
+            height: 40px;
+            background-color: #2a2e39;
+            border: 1px solid #363a45;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 0 12px;
+            text-transform: uppercase;
+            outline: none;
+        }
+        input:focus {
+            border-color: #2962ff;
+        }
+        button {
+            height: 40px;
+            padding: 0 16px;
+            background-color: #2962ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:active {
+            background-color: #1e4bd8;
+        }
+        main {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        #tv_chart_container {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
-<body class="bg-[#0b0f17] text-[#d1d4dc]">
+<body>
 
-    <!-- 1. Top Ticker Input Bar -->
-    <header class="px-3 py-2 bg-[#111827] border-b border-[#1f293d] flex items-center gap-2 shrink-0">
-        <div class="relative flex-1">
-            <input 
-                id="tickerInput" 
-                type="text" 
-                value="MU" 
-                placeholder="티커 입력 (예: MU, NVDA, AAPL, 005930)" 
-                autocomplete="off"
-                autocapitalize="characters"
-                class="w-full h-10 bg-[#1f293d] border border-[#374151] rounded-lg text-white font-bold text-sm px-3 uppercase outline-none focus:border-[#3b82f6] transition"
-            />
-        </div>
-        <button 
-            onclick="loadChart()" 
-            class="h-10 px-4 bg-[#2563eb] hover:bg-[#1d4ed8] active:bg-[#1e40af] text-white font-bold rounded-lg text-sm transition shrink-0"
-        >
-            조회
-        </button>
+    <!-- Ticker Input Bar -->
+    <header>
+        <input 
+            id="tickerInput" 
+            type="text" 
+            value="MU" 
+            placeholder="티커 입력 (예: MU, NVDA, AAPL, 005930)" 
+            autocomplete="off"
+            autocapitalize="characters"
+        />
+        <button onclick="loadChart()">조회</button>
     </header>
 
-    <!-- 2. Price, MA Legend & Peak Level Control Bar -->
-    <section class="bg-[#111827]/90 border-b border-[#1f293d] px-3 py-1.5 shrink-0 flex flex-wrap items-center justify-between gap-2 text-xs">
-        
-        <!-- Current Price & MA Legend -->
-        <div class="flex items-center gap-2">
-            <span id="tickerDisplay" class="font-bold text-white text-sm font-mono">MU</span>
-            <span id="currentPriceDisplay" class="font-black text-sm text-emerald-400 font-mono">$1,213.56</span>
-            <div class="flex items-center gap-1.5 ml-1 text-[10px] font-mono">
-                <span class="text-[#38bdf8] flex items-center gap-0.5">
-                    <span class="w-2 h-0.5 bg-[#38bdf8] inline-block"></span> MA20
-                </span>
-                <span class="text-[#a855f7] flex items-center gap-0.5">
-                    <span class="w-2 h-0.5 bg-[#a855f7] inline-block"></span> MA50
-                </span>
-            </div>
-        </div>
-
-        <!-- Peak & 0.7 Level -->
-        <div class="flex items-center gap-2 text-xs font-mono">
-            <div class="flex items-center gap-1">
-                <span class="text-amber-400 font-bold text-[11px]">고점:</span>
-                <input 
-                    id="peakPriceInput" 
-                    type="number" 
-                    step="any" 
-                    value="1255" 
-                    class="w-20 h-7 bg-[#1f293d] text-amber-300 font-mono font-bold text-xs px-1.5 rounded border border-[#374151] focus:border-amber-400 outline-none text-right"
-                    oninput="updateLinesFromInput()"
-                />
-            </div>
-            <div class="flex items-center gap-1 bg-[#1f293d] px-2 py-0.5 rounded border border-emerald-500/30">
-                <span class="text-emerald-400 text-[10px]">0.7선:</span>
-                <span id="target07Display" class="font-bold text-emerald-300 text-xs">$878.50</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- 3. Clean Fullscreen Interactive Candlestick + MA Chart -->
-    <main class="flex-1 w-full relative bg-[#0b0f17]">
-        <div id="chartContainer" class="w-full h-full"></div>
-
-        <!-- Floating Info Overlay on Chart -->
-        <div class="absolute top-2 left-2 pointer-events-none bg-[#111827]/90 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-[#1f293d] shadow-lg text-[10px] font-mono flex items-center gap-2.5">
-            <div class="flex items-center gap-1">
-                <span class="w-2.5 h-0.5 bg-amber-400 inline-block"></span>
-                <span class="text-slate-400">고점선:</span>
-                <span id="hudPeak" class="text-amber-300 font-bold">$1,255.00</span>
-            </div>
-            <div class="w-[1px] h-3 bg-slate-700"></div>
-            <div class="flex items-center gap-1">
-                <span class="w-2.5 h-0.5 bg-emerald-400 inline-block"></span>
-                <span class="text-slate-400">0.7 매수선:</span>
-                <span id="hud07" class="text-emerald-300 font-bold">$878.50</span>
-            </div>
-        </div>
+    <!-- Fullscreen TradingView Chart -->
+    <main>
+        <div id="tv_chart_container"></div>
     </main>
 
     <script>
-        lucide.createIcons();
-
-        // Baseline stock profiles
-        const TICKER_DEFAULTS = {
-            'MU': { peak: 1255.00, low: 450.00, currency: '$', isKRW: false },
-            'NVDA': { peak: 240.00, low: 155.00, currency: '$', isKRW: false },
-            'AAPL': { peak: 237.23, low: 165.00, currency: '$', isKRW: false },
-            'TSLA': { peak: 271.00, low: 138.00, currency: '$', isKRW: false },
-            '005930': { peak: 88800, low: 58000, currency: '₩', isKRW: true },
-            '000660': { peak: 248500, low: 115000, currency: '₩', isKRW: true },
-            'BTC': { peak: 73750, low: 38000, currency: '$', isKRW: false }
-        };
-
-        let chart = null;
-        let candleSeries = null;
-        let ma20Series = null;
-        let ma50Series = null;
-        let linePeak = null;
-        let lineTarget07 = null;
-        let currentCandles = [];
-        let currentIsKRW = false;
-        let currentCurrency = '$';
-
-        function formatPrice(val) {
-            if (currentIsKRW) {
-                return `₩${Math.round(val).toLocaleString()}`;
+        function normalizeTicker(ticker) {
+            ticker = ticker.trim().toUpperCase();
+            if (!ticker) return 'MU';
+            // 한국 주식 6자리 숫자 코드 자동 변환 (예: 005930 -> KRX:005930)
+            if (/^\d{6}$/.test(ticker)) {
+                return 'KRX:' + ticker;
             }
-            return `$${val.toFixed(2)}`;
+            return ticker;
         }
 
-        // Calculate Simple Moving Average (SMA)
-        function calculateSMA(data, period) {
-            const smaData = [];
-            for (let i = 0; i < data.length; i++) {
-                if (i < period - 1) continue;
-                let sum = 0;
-                for (let j = 0; j < period; j++) {
-                    sum += data[i - j].close;
-                }
-                smaData.push({
-                    time: data[i].time,
-                    value: parseFloat((sum / period).toFixed(currentIsKRW ? 0 : 2))
-                });
-            }
-            return smaData;
-        }
-
-        // Generate Candlestick Data
-        function generateCandles(ticker, explicitPeak) {
-            ticker = ticker.toUpperCase().replace('KRX:', '');
-            const isKRW = /^\d{6}$/.test(ticker);
-            const conf = TICKER_DEFAULTS[ticker] || {
-                peak: explicitPeak || (isKRW ? 100000 : 150.00),
-                low: isKRW ? 50000 : 80.00,
-                currency: isKRW ? '₩' : '$',
-                isKRW: isKRW
-            };
-
-            currentCurrency = conf.currency;
-            currentIsKRW = conf.isKRW;
-
-            const peak = explicitPeak || conf.peak;
-            const low = conf.low || (peak * 0.45);
-            const candles = [];
-            const totalBars = 260;
-            const now = new Date();
-            let date = new Date(now.getTime() - totalBars * 24 * 60 * 60 * 1000);
-
-            let seed = 0;
-            for (let i = 0; i < ticker.length; i++) seed += ticker.charCodeAt(i);
-            function rand() {
-                const x = Math.sin(seed++) * 10000;
-                return x - Math.floor(x);
-            }
-
-            let price = low + (peak - low) * 0.35;
-            const peakBarIndex = 180; // High peak at bar 180
-
-            for (let i = 0; i < totalBars; i++) {
-                if (date.getDay() === 0) date.setDate(date.getDate() + 1);
-                if (date.getDay() === 6) date.setDate(date.getDate() + 2);
-
-                const dateStr = date.toISOString().split('T')[0];
-                let target;
-                if (i < 90) {
-                    target = low + (peak - low) * 0.55;
-                } else if (i < peakBarIndex) {
-                    target = peak;
-                } else {
-                    target = low + (peak - low) * 0.48;
-                }
-
-                const drift = (target - price) * 0.03 + (Math.sin(i * 0.12) * (peak - low) * 0.02);
-                const noise = (rand() - 0.48) * ((peak - low) * 0.035);
-
-                const open = price;
-                let close = open + drift + noise;
-                if (i === peakBarIndex) close = peak * 0.99;
-
-                let high = Math.max(open, close) + Math.abs(rand() * (peak - low) * 0.015);
-                let l = Math.min(open, close) - Math.abs(rand() * (peak - low) * 0.015);
-
-                if (i === peakBarIndex) high = peak; // Guaranteed exact peak (e.g. 1255)
-                if (high >= peak && i !== peakBarIndex) high = peak * 0.985;
-
-                const roundFn = (v) => currentIsKRW ? Math.round(v) : parseFloat(v.toFixed(2));
-                candles.push({
-                    time: dateStr,
-                    open: roundFn(open),
-                    high: roundFn(high),
-                    low: roundFn(l),
-                    close: roundFn(close)
-                });
-
-                price = close;
-                date.setDate(date.getDate() + 1);
-            }
-
-            return candles;
-        }
-
-        // Initialize Chart with Candlestick & Moving Average Series
-        function initChart() {
-            const container = document.getElementById('chartContainer');
-            container.innerHTML = '';
-
-            chart = LightweightCharts.createChart(container, {
-                width: container.clientWidth,
-                height: container.clientHeight,
-                layout: {
-                    background: { color: '#0b0f17' },
-                    textColor: '#94a3b8',
-                    fontSize: 10,
-                },
-                grid: {
-                    vertLines: { color: '#161f30' },
-                    horzLines: { color: '#161f30' },
-                },
-                crosshair: {
-                    mode: LightweightCharts.CrosshairMode.Normal,
-                },
-                rightPriceScale: {
-                    borderColor: '#1f293d',
-                    scaleMargins: { top: 0.12, bottom: 0.12 },
-                    autoScale: true,
-                },
-                timeScale: {
-                    borderColor: '#1f293d',
-                    fixLeftEdge: true,
-                    fixRightEdge: true,
-                    barSpacing: 6,
-                },
-                handleScroll: {
-                    mouseWheel: true,
-                    pressedMouseMove: true,
-                    horzTouchDrag: true,
-                    vertTouchDrag: false
-                },
-                handleScale: {
-                    axisPressedMouseMove: true,
-                    pinch: true,
-                }
-            });
-
-            // 1. Candlestick Series (실시간 캔들)
-            candleSeries = chart.addCandlestickSeries({
-                upColor: '#089981',
-                downColor: '#f23645',
-                borderUpColor: '#089981',
-                borderDownColor: '#f23645',
-                wickUpColor: '#089981',
-                wickDownColor: '#f23645',
-            });
-
-            // 2. MA 20 Line Series (이동평균선 20일)
-            ma20Series = chart.addLineSeries({
-                color: '#38bdf8', // Light Blue
-                lineWidth: 1.5,
-                priceLineVisible: false,
-                lastValueVisible: false,
-            });
-
-            // 3. MA 50 Line Series (이동평균선 50일)
-            ma50Series = chart.addLineSeries({
-                color: '#a855f7', // Purple
-                lineWidth: 1.5,
-                priceLineVisible: false,
-                lastValueVisible: false,
-            });
-
-            // 4. Automatic Horizontal Price Lines (고점 & 0.7 지점 수평선)
-            linePeak = candleSeries.createPriceLine({
-                price: 1255,
-                color: '#f59e0b', // Gold Solid Line
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Solid,
-                axisLabelVisible: true,
-                title: '고점'
-            });
-
-            lineTarget07 = candleSeries.createPriceLine({
-                price: 1255 * 0.70,
-                color: '#10b981', // Emerald Dashed Line
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: '0.7 지점 (-30%)'
-            });
-
-            window.addEventListener('resize', () => {
-                if (chart && container) {
-                    chart.applyOptions({
-                        width: container.clientWidth,
-                        height: container.clientHeight
-                    });
-                }
-            });
-        }
-
-        // Update Horizontal Lines on Chart
-        function updateLines(peak) {
-            const target07 = peak * 0.70;
-            const formattedPeak = formatPrice(peak);
-            const formatted07 = formatPrice(target07);
-
-            if (linePeak) {
-                linePeak.applyOptions({
-                    price: peak,
-                    title: `고점: ${formattedPeak}`
-                });
-            }
-
-            if (lineTarget07) {
-                lineTarget07.applyOptions({
-                    price: target07,
-                    title: `0.7 지점 (-30%): ${formatted07}`
-                });
-            }
-
-            document.getElementById('target07Display').textContent = formatted07;
-            document.getElementById('hudPeak').textContent = formattedPeak;
-            document.getElementById('hud07').textContent = formatted07;
-        }
-
-        function updateLinesFromInput() {
-            const peak = parseFloat(document.getElementById('peakPriceInput').value) || 0;
-            updateLines(peak);
-        }
-
-        // Load Ticker Data, Calculate MAs, and Render Chart
         function loadChart() {
             const input = document.getElementById('tickerInput');
-            const rawTicker = input.value.trim().toUpperCase() || 'MU';
-            input.blur();
+            const symbol = normalizeTicker(input.value);
+            input.blur(); // 모바일 키보드 닫기
 
-            document.getElementById('tickerDisplay').textContent = rawTicker;
+            const container = document.getElementById('tv_chart_container');
+            container.innerHTML = '';
 
-            // Set Peak value
-            const cleanKey = rawTicker.replace('KRX:', '');
-            if (TICKER_DEFAULTS[cleanKey]) {
-                document.getElementById('peakPriceInput').value = TICKER_DEFAULTS[cleanKey].peak;
+            const widgetDiv = document.createElement('div');
+            widgetDiv.id = 'tradingview_widget';
+            widgetDiv.style.width = '100%';
+            widgetDiv.style.height = '100%';
+            container.appendChild(widgetDiv);
+
+            if (typeof TradingView !== 'undefined') {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": symbol,
+                    "interval": "D",
+                    "timezone": "Asia/Seoul",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "kr",
+                    "toolbar_bg": "#1e222d",
+                    "enable_publishing": false,
+                    "allow_symbol_change": true,
+                    "container_id": "tradingview_widget"
+                });
             }
-            const currentPeak = parseFloat(document.getElementById('peakPriceInput').value) || 1255;
-
-            // 1. Generate Candlestick Data
-            currentCandles = generateCandles(rawTicker, currentPeak);
-            candleSeries.setData(currentCandles);
-
-            // 2. Calculate and Set Moving Averages (MA20, MA50)
-            const ma20Data = calculateSMA(currentCandles, 20);
-            const ma50Data = calculateSMA(currentCandles, 50);
-            ma20Series.setData(ma20Data);
-            ma50Series.setData(ma50Data);
-
-            // 3. Update Current Latest Price
-            const latestCandle = currentCandles[currentCandles.length - 1];
-            if (latestCandle) {
-                document.getElementById('currentPriceDisplay').textContent = formatPrice(latestCandle.close);
-            }
-
-            // 4. Draw Automatic Horizontal Lines
-            updateLines(currentPeak);
-
-            // 5. Fit Focus View (~90 bars)
-            const total = currentCandles.length;
-            chart.timeScale().setVisibleLogicalRange({
-                from: Math.max(0, total - 90),
-                to: total - 1
-            });
         }
 
+        // Enter Key Listener
         document.getElementById('tickerInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') loadChart();
-        });
-
-        document.getElementById('peakPriceInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                updateLinesFromInput();
-                this.blur();
+                loadChart();
             }
         });
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initChart();
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', function() {
             loadChart();
         });
     </script>
