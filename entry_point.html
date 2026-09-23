@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>모바일 주식 차트 - 최고점 수평선 표시</title>
+    <title>모바일 주식 차트 - 최고가 수평선</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- TradingView Lightweight Charts CDN -->
+    <!-- TradingView Lightweight Charts v4 CDN -->
     <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
     <script>
         tailwind.config = {
@@ -33,7 +33,6 @@
         * {
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
-            user-select: none;
         }
 
         body {
@@ -41,7 +40,7 @@
             background-color: #070a0f;
             color: #e2e8f0;
             overflow-x: hidden;
-            touch-action: manipulation;
+            touch-action: pan-y;
         }
 
         .font-mono {
@@ -51,11 +50,11 @@
 </head>
 <body class="h-[100dvh] flex flex-col bg-[#070a0f] text-slate-100 antialiased overflow-hidden">
 
-    <!-- Top Sticky Search & Status Bar -->
+    <!-- Top Sticky Search & Ticker Bar -->
     <header class="bg-[#0d131f] border-b border-slate-800 px-3 py-2 shrink-0 z-50">
         <div class="max-w-2xl mx-auto space-y-2">
             
-            <!-- Ticker Input Row -->
+            <!-- Ticker Input Form -->
             <form id="tickerForm" class="flex items-center gap-2" onsubmit="event.preventDefault(); applyTicker();">
                 <div class="relative flex-1">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -95,117 +94,114 @@
                 <span class="text-[10px] text-slate-400 font-semibold shrink-0 mr-0.5">인기:</span>
                 <button onclick="setTicker('MU')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-slate-700 font-mono font-bold shrink-0 transition">MU</button>
                 <button onclick="setTicker('NVDA')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">NVDA</button>
-                <button onclick="setTicker('AAPL')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">AAPL</button>
                 <button onclick="setTicker('TSLA')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">TSLA</button>
-                <button onclick="setTicker('GOOGL')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">GOOGL</button>
+                <button onclick="setTicker('AAPL')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">AAPL</button>
                 <button onclick="setTicker('PLTR')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">PLTR</button>
+                <button onclick="setTicker('QQQ')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-blue-400 border border-slate-700 font-mono font-semibold shrink-0 transition">QQQ</button>
                 <button onclick="setTicker('005930')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-semibold shrink-0 transition">삼성전자</button>
                 <button onclick="setTicker('000660')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-semibold shrink-0 transition">SK하이닉스</button>
+                <button onclick="setTicker('BTC')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-yellow-400 border border-slate-700 font-mono font-semibold shrink-0 transition">BTC</button>
             </div>
 
         </div>
     </header>
 
-    <!-- Main Fullscreen Chart Area with Highest Price Overlay -->
-    <main class="flex-1 w-full relative bg-[#070a0f]">
-        
-        <!-- Interactive Chart Container -->
-        <div id="chartContainer" class="w-full h-full"></div>
+    <!-- Top Peak Info Bar -->
+    <div class="bg-[#0d131f]/90 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between text-xs shrink-0">
+        <div class="flex items-center gap-2">
+            <span id="stockTitle" class="font-bold font-mono text-white text-sm">MU</span>
+            <span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">
+                <span class="w-2 h-0.5 bg-amber-400 inline-block"></span>
+                x축 평행 최고가 수평선
+            </span>
+        </div>
+        <div class="text-right">
+            <span class="text-[10px] text-slate-400">최고가 (Peak): </span>
+            <span id="topPeakPrice" class="font-bold font-mono text-amber-400 text-sm">$0.00</span>
+        </div>
+    </div>
 
-        <!-- Floating Highest Price & Current Price Banner -->
-        <div class="absolute top-3 left-3 z-10 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2.5 shadow-2xl flex items-center gap-3">
-            <div>
-                <span class="text-[9px] text-amber-400 font-bold block flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 최고점 (ATH)
-                </span>
-                <span id="peakPriceText" class="text-sm font-black font-mono text-amber-300">$157.50</span>
-            </div>
-            <div class="w-[1px] h-6 bg-slate-700"></div>
-            <div>
-                <span class="text-[9px] text-slate-400 font-medium block">최근가</span>
-                <span id="currentPriceText" class="text-sm font-bold font-mono text-white">$108.40</span>
-            </div>
-            <div class="w-[1px] h-6 bg-slate-700"></div>
-            <div>
-                <span class="text-[9px] text-slate-400 font-medium block">최고가 대비</span>
-                <span id="dropRateText" class="text-xs font-bold font-mono text-rose-400">-31.17%</span>
+    <!-- Main Fullscreen Chart Area -->
+    <main class="flex-1 w-full relative bg-[#070a0f] p-2">
+        <div id="chartContainer" class="w-full h-full rounded-xl overflow-hidden"></div>
+
+        <!-- Floating Badge -->
+        <div class="absolute top-4 left-4 pointer-events-none bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-xl text-xs font-mono">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <span class="text-slate-300">최고가 지점:</span>
+                <span id="floatingPeakPrice" class="text-amber-400 font-black text-sm">$0.00</span>
             </div>
         </div>
-
-        <!-- Quick Reset View Button -->
-        <button 
-            id="fitViewBtn" 
-            onclick="fitChart()"
-            class="absolute bottom-4 right-4 z-10 bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 shadow-lg flex items-center gap-1 font-semibold"
-        >
-            <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-blue-400"></i>
-            <span>차트 맞춤</span>
-        </button>
-
     </main>
 
-    <!-- Script Logic -->
+    <!-- Bottom Quick Summary Bar -->
+    <footer class="bg-[#0d131f] border-t border-slate-800 px-3 py-2 shrink-0 grid grid-cols-3 gap-2 text-center text-xs font-mono">
+        <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-800">
+            <span class="text-[10px] text-slate-400 block">최고가 (Peak)</span>
+            <span id="summaryPeakPrice" class="font-bold text-amber-400 text-sm">$0.00</span>
+        </div>
+        <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-800">
+            <span class="text-[10px] text-slate-400 block">현재가 (Close)</span>
+            <span id="summaryCurrentPrice" class="font-bold text-white text-sm">$0.00</span>
+        </div>
+        <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-800">
+            <span class="text-[10px] text-slate-400 block">최고가 대비</span>
+            <span id="summaryDropRate" class="font-bold text-rose-400 text-sm">-0.00%</span>
+        </div>
+    </footer>
+
+    <!-- Logic Script -->
     <script>
         lucide.createIcons();
 
-        // Stock Metadata & Base Real Prices
-        const KNOWN_STOCKS = {
-            'MU': { name: 'Micron Technology', currency: '$', high: 157.50, current: 108.40, isKRW: false },
-            'NVDA': { name: 'Nvidia', currency: '$', high: 140.76, current: 116.20, isKRW: false },
-            'AAPL': { name: 'Apple', currency: '$', high: 237.23, current: 228.00, isKRW: false },
-            'TSLA': { name: 'Tesla', currency: '$', high: 271.00, current: 245.00, isKRW: false },
-            'GOOGL': { name: 'Alphabet', currency: '$', high: 191.75, current: 162.30, isKRW: false },
-            'PLTR': { name: 'Palantir', currency: '$', high: 44.20, current: 37.10, isKRW: false },
-            'VICR': { name: 'Vicor', currency: '$', high: 98.40, current: 42.50, isKRW: false },
-            'DIS': { name: 'Walt Disney', currency: '$', high: 123.74, current: 93.80, isKRW: false },
-            'VST': { name: 'Vistra', currency: '$', high: 143.86, current: 119.50, isKRW: false },
-            'RBLX': { name: 'Roblox', currency: '$', high: 63.85, current: 41.20, isKRW: false },
-            '005930': { name: '삼성전자', currency: '₩', high: 88800, current: 63000, isKRW: true },
-            '000660': { name: 'SK하이닉스', currency: '₩', high: 248500, current: 165000, isKRW: true },
-            '207940': { name: '삼성바이오로직스', currency: '₩', high: 1120000, current: 1010000, isKRW: true },
-            '012330': { name: '현대모비스', currency: '₩', high: 265000, current: 215000, isKRW: true },
-            '042660': { name: '한화오션', currency: '₩', high: 41850, current: 28200, isKRW: true },
-            '028260': { name: '삼성물산', currency: '₩', high: 172000, current: 136000, isKRW: true },
-            '001040': { name: 'CJ', currency: '₩', high: 142500, current: 112000, isKRW: true }
+        // Stock database with realistic prices & currencies
+        const STOCK_PROFILES = {
+            'MU': { name: 'Micron Technology', currency: '$', high: 157.50, isKRW: false },
+            'NVDA': { name: 'Nvidia', currency: '$', high: 140.76, isKRW: false },
+            'TSLA': { name: 'Tesla', currency: '$', high: 271.00, isKRW: false },
+            'AAPL': { name: 'Apple', currency: '$', high: 237.23, isKRW: false },
+            'PLTR': { name: 'Palantir', currency: '$', high: 44.20, isKRW: false },
+            'QQQ': { name: 'Invesco QQQ', currency: '$', high: 503.50, isKRW: false },
+            '005930': { name: '삼성전자', currency: '₩', high: 88800, isKRW: true },
+            '000660': { name: 'SK하이닉스', currency: '₩', high: 248500, isKRW: true },
+            'BTC': { name: 'Bitcoin', currency: '$', high: 73750, isKRW: false }
         };
 
         let chart = null;
         let candleSeries = null;
-        let peakPriceLine = null;
+        let peakHorizontalLine = null; // The horizontal line parallel to X-axis
         let currentCandles = [];
-        let currentTicker = 'MU';
+        let currentMeta = { currency: '$', isKRW: false };
 
         const tickerInput = document.getElementById('tickerInput');
         const clearBtn = document.getElementById('clearBtn');
-        const peakPriceText = document.getElementById('peakPriceText');
-        const currentPriceText = document.getElementById('currentPriceText');
-        const dropRateText = document.getElementById('dropRateText');
 
-        function formatCurrency(val, isKRW, currency) {
-            if (isKRW) {
-                return `${currency}${Math.round(val).toLocaleString()}`;
+        function formatPrice(val) {
+            if (currentMeta.isKRW) {
+                return `${currentMeta.currency}${Math.round(val).toLocaleString()}`;
             }
-            return `${currency}${val.toFixed(2)}`;
+            return `${currentMeta.currency}${val.toFixed(2)}`;
         }
 
-        // Generate 1-Year realistic daily candlestick data with an accurate peak point
-        function generateStockCandles(ticker) {
-            const isKRW = /^\d{6}$/.test(ticker) || (KNOWN_STOCKS[ticker] && KNOWN_STOCKS[ticker].isKRW);
-            const meta = KNOWN_STOCKS[ticker] || {
-                currency: isKRW ? '₩' : '$',
-                high: isKRW ? 100000 : 150.00,
-                current: isKRW ? 75000 : 110.00,
-                isKRW: isKRW
+        // Generate Candlestick Data for any given ticker
+        function generateDataForTicker(ticker) {
+            ticker = ticker.toUpperCase().replace('KRX:', '').replace('.KS', '');
+            const profile = STOCK_PROFILES[ticker] || {
+                name: ticker,
+                currency: /^\d{6}$/.test(ticker) ? '₩' : '$',
+                high: /^\d{6}$/.test(ticker) ? 100000 : 150.00,
+                isKRW: /^\d{6}$/.test(ticker)
             };
 
-            const peak = meta.high;
-            const current = meta.current;
-            const totalBars = 250;
+            currentMeta = { currency: profile.currency, isKRW: profile.isKRW };
+
+            const baseHigh = profile.high;
             const candles = [];
+            const totalBars = 200;
             const now = new Date();
             let date = new Date(now.getTime() - totalBars * 24 * 60 * 60 * 1000);
 
-            // Seed based on ticker
             let seed = 0;
             for (let i = 0; i < ticker.length; i++) seed += ticker.charCodeAt(i);
             function rand() {
@@ -213,90 +209,91 @@
                 return x - Math.floor(x);
             }
 
-            const peakBarIndex = 180; // Peak point
-            let price = peak * 0.65;
+            let price = baseHigh * 0.60;
+            const peakIndex = Math.floor(totalBars * 0.70); // Peak day
 
             for (let i = 0; i < totalBars; i++) {
                 if (date.getDay() === 0) date.setDate(date.getDate() + 1);
                 if (date.getDay() === 6) date.setDate(date.getDate() + 2);
 
                 const dateStr = date.toISOString().split('T')[0];
-                let open, close, high, low;
+                let open = price;
+                let close, high, low;
 
-                if (i < peakBarIndex) {
-                    const target = peak * 0.65 + (peak * 0.35) * (i / peakBarIndex);
-                    open = price;
-                    close = target + (rand() - 0.48) * (peak * 0.025);
-                    if (close > peak * 0.98) close = peak * 0.98;
-                    high = Math.max(open, close) + Math.abs(rand() * peak * 0.012);
-                    low = Math.min(open, close) - Math.abs(rand() * peak * 0.012);
-                } else if (i === peakBarIndex) {
+                if (i < peakIndex) {
+                    close = open + (baseHigh - price) * 0.03 + (rand() - 0.47) * (baseHigh * 0.025);
+                    high = Math.max(open, close) + Math.abs(rand() * baseHigh * 0.015);
+                    low = Math.min(open, close) - Math.abs(rand() * baseHigh * 0.015);
+                    if (high >= baseHigh) high = baseHigh * 0.985;
+                } else if (i === peakIndex) {
                     // Exact Peak Bar
-                    open = peak * 0.97;
-                    high = peak; // Highest Price!
-                    close = peak * 0.99;
-                    low = peak * 0.96;
+                    open = baseHigh * 0.97;
+                    close = baseHigh * 0.99;
+                    high = baseHigh; // Highest price point
+                    low = baseHigh * 0.96;
                 } else {
-                    const postProgress = (i - peakBarIndex) / (totalBars - 1 - peakBarIndex);
-                    const target = peak - (peak - current) * postProgress;
-                    open = price;
-                    close = (i === totalBars - 1) ? current : target + (rand() - 0.48) * (peak * 0.02);
-                    high = Math.max(open, close) + Math.abs(rand() * peak * 0.012);
-                    low = Math.min(open, close) - Math.abs(rand() * peak * 0.012);
-                    if (high >= peak) high = peak * 0.995;
+                    // Pullback
+                    close = open - (price - baseHigh * 0.70) * 0.025 + (rand() - 0.5) * (baseHigh * 0.025);
+                    high = Math.max(open, close) + Math.abs(rand() * baseHigh * 0.012);
+                    low = Math.min(open, close) - Math.abs(rand() * baseHigh * 0.012);
+                    if (high >= baseHigh) high = baseHigh * 0.99;
                 }
 
-                const roundVal = (v) => isKRW ? Math.round(v) : parseFloat(v.toFixed(2));
+                const roundFn = (v) => profile.isKRW ? Math.round(v) : parseFloat(v.toFixed(2));
                 candles.push({
                     time: dateStr,
-                    open: roundVal(open),
-                    high: roundVal(high),
-                    low: roundVal(low),
-                    close: roundVal(close)
+                    open: roundFn(open),
+                    high: roundFn(high),
+                    low: roundFn(low),
+                    close: roundFn(close)
                 });
 
                 price = close;
                 date.setDate(date.getDate() + 1);
             }
 
-            return { candles, meta };
+            return candles;
         }
 
-        // Initialize Lightweight Charts
+        // Initialize Chart
         function initChart() {
             const container = document.getElementById('chartContainer');
             container.innerHTML = '';
 
             chart = LightweightCharts.createChart(container, {
-                width: container.clientWidth || window.innerWidth,
-                height: container.clientHeight || window.innerHeight,
+                width: container.clientWidth || 360,
+                height: container.clientHeight || 400,
                 layout: {
                     background: { color: '#070a0f' },
                     textColor: '#94a3b8',
-                    fontSize: 11,
+                    fontSize: 10,
                 },
                 grid: {
-                    vertLines: { color: '#111827' },
-                    horzLines: { color: '#111827' },
+                    vertLines: { color: '#131c2b' },
+                    horzLines: { color: '#131c2b' },
                 },
                 crosshair: {
                     mode: LightweightCharts.CrosshairMode.Normal,
-                    vertLine: { color: '#475569', width: 1, style: LightweightCharts.LineStyle.Dashed },
-                    horzLine: { color: '#475569', width: 1, style: LightweightCharts.LineStyle.Dashed }
                 },
                 rightPriceScale: {
-                    borderColor: '#1f293d',
-                    scaleMargins: { top: 0.15, bottom: 0.12 },
-                    autoScale: true,
+                    borderColor: '#1e293b',
+                    scaleMargins: { top: 0.15, bottom: 0.15 },
                 },
                 timeScale: {
-                    borderColor: '#1f293d',
+                    borderColor: '#1e293b',
                     fixLeftEdge: true,
                     fixRightEdge: true,
-                    barSpacing: 7,
                 },
-                handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
-                handleScale: { axisPressedMouseMove: true, pinch: true }
+                handleScroll: {
+                    mouseWheel: true,
+                    pressedMouseMove: true,
+                    horzTouchDrag: true,
+                    vertTouchDrag: false
+                },
+                handleScale: {
+                    axisPressedMouseMove: true,
+                    pinch: true,
+                }
             });
 
             candleSeries = chart.addCandlestickSeries({
@@ -308,76 +305,81 @@
                 wickDownColor: '#ef4444',
             });
 
-            window.addEventListener('resize', () => {
-                if (chart && container) {
-                    chart.applyOptions({
-                        width: container.clientWidth,
-                        height: container.clientHeight
-                    });
-                }
+            const resizeObserver = new ResizeObserver(entries => {
+                if (!entries.length || !chart) return;
+                const { width, height } = entries[0].contentRect;
+                chart.applyOptions({ width, height });
             });
+            resizeObserver.observe(container);
         }
 
-        // Load and Render Stock Chart with Peak Line & Values
-        function renderStock(rawTicker) {
-            const ticker = rawTicker.trim().toUpperCase();
-            if (!ticker) return;
+        // Render Chart and Draw Horizontal Line at Highest Price Point
+        function loadTickerChart(ticker) {
+            const cleanTicker = ticker.trim().toUpperCase();
+            document.getElementById('stockTitle').textContent = cleanTicker;
 
-            currentTicker = ticker;
-            const { candles, meta } = generateStockCandles(ticker);
-            currentCandles = candles;
-            candleSeries.setData(candles);
+            // 1. Generate & Load Candlestick Data
+            currentCandles = generateDataForTicker(cleanTicker);
+            candleSeries.setData(currentCandles);
 
-            // 1. Find the Absolute Highest Price
-            let peakPrice = -Infinity;
-            candles.forEach(c => {
-                if (c.high > peakPrice) peakPrice = c.high;
+            // 2. Find the Absolute Highest Price Point in the Data
+            let highestPrice = -Infinity;
+            currentCandles.forEach(candle => {
+                if (candle.high > highestPrice) {
+                    highestPrice = candle.high;
+                }
             });
 
-            const lastCandle = candles[candles.length - 1];
-            const currentPrice = lastCandle.close;
-            const dropRate = ((currentPrice - peakPrice) / peakPrice) * 100;
-            const formattedPeak = formatCurrency(peakPrice, meta.isKRW, meta.currency);
-            const formattedCurrent = formatCurrency(currentPrice, meta.isKRW, meta.currency);
+            const lastCandle = currentCandles[currentCandles.length - 1];
+            const currentPrice = lastCandle ? lastCandle.close : highestPrice;
+            const dropRate = ((currentPrice - highestPrice) / highestPrice) * 100;
 
-            // 2. Remove Old Line & Draw Bright Gold Horizontal Line at Peak
-            if (peakPriceLine) {
-                candleSeries.removePriceLine(peakPriceLine);
+            // 3. Draw or Update the X-axis Parallel Horizontal Line at Highest Price
+            if (peakHorizontalLine) {
+                candleSeries.removePriceLine(peakHorizontalLine);
             }
 
-            peakPriceLine = candleSeries.createPriceLine({
-                price: peakPrice,
-                color: '#f59e0b', // Amber/Gold
+            // Create horizontal straight line parallel to x-axis
+            peakHorizontalLine = candleSeries.createPriceLine({
+                price: highestPrice,
+                color: '#f59e0b', // Gold / Amber
                 lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Solid,
+                lineStyle: LightweightCharts.LineStyle.Solid, // Clear solid horizontal line
                 axisLabelVisible: true,
-                title: `최고점: ${formattedPeak}`,
+                title: `최고가 (Peak): ${formatPrice(highestPrice)}`,
             });
 
-            // 3. Update Banner Display Values
-            peakPriceText.textContent = formattedPeak;
-            currentPriceText.textContent = formattedCurrent;
-            dropRateText.textContent = `${dropRate.toFixed(2)}%`;
-            dropRateText.className = dropRate >= 0 
-                ? "text-xs font-bold font-mono text-emerald-400" 
-                : "text-xs font-bold font-mono text-rose-400";
+            // 4. Update UI Displays
+            const formattedHigh = formatPrice(highestPrice);
+            const formattedCurrent = formatPrice(currentPrice);
 
-            // 4. Fit View
+            document.getElementById('topPeakPrice').textContent = formattedHigh;
+            document.getElementById('floatingPeakPrice').textContent = formattedHigh;
+            document.getElementById('summaryPeakPrice').textContent = formattedHigh;
+            document.getElementById('summaryCurrentPrice').textContent = formattedCurrent;
+            
+            const dropRateEl = document.getElementById('summaryDropRate');
+            dropRateEl.textContent = `${dropRate.toFixed(2)}%`;
+            dropRateEl.className = dropRate >= 0 
+                ? "font-bold text-emerald-400 text-sm" 
+                : "font-bold text-rose-400 text-sm";
+
+            // 5. Fit Content View
             chart.timeScale().fitContent();
         }
 
         function applyTicker() {
             const val = tickerInput.value.trim();
             if (val) {
-                renderStock(val);
-                tickerInput.blur();
+                loadTickerChart(val);
+                tickerInput.blur(); // Close mobile keyboard
             }
         }
 
         function setTicker(symbol) {
             tickerInput.value = symbol;
             toggleClearBtn();
-            renderStock(symbol);
+            loadTickerChart(symbol);
         }
 
         function clearInput() {
@@ -394,16 +396,12 @@
             }
         }
 
-        function fitChart() {
-            if (chart) chart.timeScale().fitContent();
-        }
-
         tickerInput.addEventListener('input', toggleClearBtn);
 
         // Initial Load
         window.addEventListener('DOMContentLoaded', () => {
             initChart();
-            renderStock('MU');
+            loadTickerChart('MU');
             toggleClearBtn();
         });
     </script>
