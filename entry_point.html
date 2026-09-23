@@ -3,244 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stock Chart</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- TradingView Lightweight Charts CDN -->
-    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <title>모바일 주식 차트</title>
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background-color: #0b0f17;
-            color: #ffffff;
+            background-color: #131722;
+            color: #d1d4dc;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
             height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
+        header {
+            padding: 8px 12px;
+            background-color: #1e222d;
+            border-bottom: 1px solid #2a2e39;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        input {
+            flex: 1;
+            height: 40px;
+            background-color: #2a2e39;
+            border: 1px solid #363a45;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 0 12px;
+            text-transform: uppercase;
+            outline: none;
+        }
+        input:focus {
+            border-color: #2962ff;
+        }
+        button {
+            height: 40px;
+            padding: 0 16px;
+            background-color: #2962ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:active {
+            background-color: #1e4bd8;
+        }
+        main {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        #tv_chart_container {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
-<body class="bg-[#0b0f17] text-white">
+<body>
 
-    <!-- Top Input Bar -->
-    <header class="p-3 bg-[#111827] border-b border-slate-800 flex items-center gap-2 shrink-0">
+    <!-- Ticker Input Bar -->
+    <header>
         <input 
             id="tickerInput" 
             type="text" 
             value="MU" 
             placeholder="티커 입력 (예: MU, NVDA, AAPL, 005930)" 
-            class="flex-1 h-11 bg-[#1f293d] text-white font-bold px-3 rounded-lg border border-slate-700 uppercase focus:outline-none focus:border-blue-500 text-sm"
+            autocomplete="off"
+            autocapitalize="characters"
         />
-        <button 
-            id="searchBtn" 
-            onclick="loadChart()" 
-            class="h-11 px-5 bg-blue-600 active:bg-blue-700 text-white font-bold rounded-lg text-sm transition"
-        >
-            조회
-        </button>
+        <button onclick="loadChart()">조회</button>
     </header>
 
-    <!-- Top Info Bar: Peak Price -->
-    <div class="px-3 py-2 bg-[#111827]/80 flex justify-between items-center text-xs border-b border-slate-800 shrink-0">
-        <span id="tickerDisplay" class="font-bold text-sm text-blue-400">MU</span>
-        <span class="text-amber-400 font-bold">
-            최고가 수평선: <span id="peakPriceDisplay" class="text-white font-mono text-sm">$0.00</span>
-        </span>
-    </div>
-
-    <!-- Fullscreen Chart Container -->
-    <main class="flex-1 w-full relative">
-        <div id="chart" class="w-full h-full"></div>
+    <!-- Fullscreen Chart -->
+    <main>
+        <div id="tv_chart_container"></div>
     </main>
 
     <script>
-        // Preset stock base prices
-        const PRESET_PRICES = {
-            'MU': { high: 157.50, unit: '$' },
-            'NVDA': { high: 140.76, unit: '$' },
-            'AAPL': { high: 237.23, unit: '$' },
-            'TSLA': { high: 271.00, unit: '$' },
-            '005930': { high: 88800, unit: '₩' },
-            '000660': { high: 248500, unit: '₩' },
-            'BTC': { high: 73750, unit: '$' }
-        };
-
-        let chart = null;
-        let candleSeries = null;
-        let highestLine = null; // Horizontal line parallel to x-axis
-
-        // Generate 180 days of realistic candlestick history
-        function generateCandles(ticker) {
-            ticker = ticker.toUpperCase().replace('KRX:', '');
-            const preset = PRESET_PRICES[ticker] || {
-                high: /^\d{6}$/.test(ticker) ? 100000 : 150.00,
-                unit: /^\d{6}$/.test(ticker) ? '₩' : '$'
-            };
-
-            const maxPrice = preset.high;
-            const isKRW = preset.unit === '₩';
-            const candles = [];
-            const totalDays = 180;
-            const now = new Date();
-            let date = new Date(now.getTime() - totalDays * 24 * 60 * 60 * 1000);
-
-            let seed = 0;
-            for (let i = 0; i < ticker.length; i++) seed += ticker.charCodeAt(i);
-            function rand() {
-                const x = Math.sin(seed++) * 10000;
-                return x - Math.floor(x);
+        function normalizeTicker(ticker) {
+            ticker = ticker.trim().toUpperCase();
+            if (!ticker) return 'MU';
+            // 한국 주식 6자리 숫자 코드 자동 변환 (예: 005930 -> KRX:005930)
+            if (/^\d{6}$/.test(ticker)) {
+                return 'KRX:' + ticker;
             }
-
-            let price = maxPrice * 0.65;
-            const peakDay = Math.floor(totalDays * 0.70); // Peak occurs at day 126
-
-            for (let i = 0; i < totalDays; i++) {
-                if (date.getDay() === 0) date.setDate(date.getDate() + 1);
-                if (date.getDay() === 6) date.setDate(date.getDate() + 2);
-
-                const timeStr = date.toISOString().split('T')[0];
-                let open = price;
-                let close, high, low;
-
-                if (i < peakDay) {
-                    close = open + (maxPrice - price) * 0.03 + (rand() - 0.47) * (maxPrice * 0.02);
-                    high = Math.max(open, close) + Math.abs(rand() * maxPrice * 0.012);
-                    low = Math.min(open, close) - Math.abs(rand() * maxPrice * 0.012);
-                    if (high >= maxPrice) high = maxPrice * 0.99;
-                } else if (i === peakDay) {
-                    // Highest Price Point
-                    open = maxPrice * 0.97;
-                    close = maxPrice * 0.99;
-                    high = maxPrice; // EXACT PEAK
-                    low = maxPrice * 0.96;
-                } else {
-                    close = open - (price - maxPrice * 0.70) * 0.025 + (rand() - 0.5) * (maxPrice * 0.02);
-                    high = Math.max(open, close) + Math.abs(rand() * maxPrice * 0.01);
-                    low = Math.min(open, close) - Math.abs(rand() * maxPrice * 0.01);
-                    if (high >= maxPrice) high = maxPrice * 0.99;
-                }
-
-                const roundVal = (v) => isKRW ? Math.round(v) : parseFloat(v.toFixed(2));
-                candles.push({
-                    time: timeStr,
-                    open: roundVal(open),
-                    high: roundVal(high),
-                    low: roundVal(low),
-                    close: roundVal(close)
-                });
-
-                price = close;
-                date.setDate(date.getDate() + 1);
-            }
-
-            return { candles, preset };
+            return ticker;
         }
 
-        // Initialize Lightweight Chart
-        function initChart() {
-            const container = document.getElementById('chart');
-            container.innerHTML = '';
-
-            chart = LightweightCharts.createChart(container, {
-                width: container.clientWidth,
-                height: container.clientHeight,
-                layout: {
-                    background: { color: '#0b0f17' },
-                    textColor: '#94a3b8',
-                },
-                grid: {
-                    vertLines: { color: '#161f30' },
-                    horzLines: { color: '#161f30' },
-                },
-                crosshair: {
-                    mode: LightweightCharts.CrosshairMode.Normal,
-                },
-                rightPriceScale: {
-                    borderColor: '#222f46',
-                },
-                timeScale: {
-                    borderColor: '#222f46',
-                },
-            });
-
-            candleSeries = chart.addCandlestickSeries({
-                upColor: '#10b981',
-                downColor: '#ef4444',
-                borderVisible: false,
-                wickUpColor: '#10b981',
-                wickDownColor: '#ef4444',
-            });
-
-            window.addEventListener('resize', () => {
-                if (chart && container) {
-                    chart.applyOptions({
-                        width: container.clientWidth,
-                        height: container.clientHeight
-                    });
-                }
-            });
-        }
-
-        // Load Ticker and Draw Horizontal Peak Line
         function loadChart() {
             const input = document.getElementById('tickerInput');
-            const ticker = input.value.trim().toUpperCase() || 'MU';
-            input.blur(); // Close mobile keyboard
+            const symbol = normalizeTicker(input.value);
+            input.blur(); // 모바일 키보드 닫기
 
-            document.getElementById('tickerDisplay').textContent = ticker;
+            const container = document.getElementById('tv_chart_container');
+            container.innerHTML = '';
 
-            // 1. Generate & Set Candlestick Data
-            const { candles, preset } = generateCandles(ticker);
-            candleSeries.setData(candles);
+            const widgetDiv = document.createElement('div');
+            widgetDiv.id = 'tradingview_widget';
+            widgetDiv.style.width = '100%';
+            widgetDiv.style.height = '100%';
+            container.appendChild(widgetDiv);
 
-            // 2. Find the Highest High in Data
-            let highestPrice = -Infinity;
-            candles.forEach(c => {
-                if (c.high > highestPrice) {
-                    highestPrice = c.high;
-                }
-            });
-
-            // 3. Draw or Update Horizontal Straight Line Parallel to X-Axis
-            if (highestLine) {
-                candleSeries.removePriceLine(highestLine);
+            if (typeof TradingView !== 'undefined') {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": symbol,
+                    "interval": "D",
+                    "timezone": "Asia/Seoul",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "kr",
+                    "toolbar_bg": "#1e222d",
+                    "enable_publishing": false,
+                    "allow_symbol_change": true,
+                    "container_id": "tradingview_widget"
+                });
             }
-
-            const formattedPrice = preset.unit === '₩' 
-                ? `₩${Math.round(highestPrice).toLocaleString()}` 
-                : `$${highestPrice.toFixed(2)}`;
-
-            highestLine = candleSeries.createPriceLine({
-                price: highestPrice,
-                color: '#f59e0b', // Gold Solid Horizontal Line
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Solid, // Straight horizontal line
-                axisLabelVisible: true,
-                title: `최고가: ${formattedPrice}`,
-            });
-
-            document.getElementById('peakPriceDisplay').textContent = formattedPrice;
-
-            // Fit time scale
-            chart.timeScale().fitContent();
         }
 
         // Enter Key Listener
-        document.getElementById('tickerInput').addEventListener('keydown', (e) => {
+        document.getElementById('tickerInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 loadChart();
             }
         });
 
-        // Start
-        window.addEventListener('DOMContentLoaded', () => {
-            initChart();
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', function() {
             loadChart();
         });
     </script>
