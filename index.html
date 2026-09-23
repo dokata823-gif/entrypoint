@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>모바일 주식 차트 - 가시영역 실시간 고점 & 0.7선</title>
+    <title>모바일 주식 차트</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -34,7 +34,7 @@
 </head>
 <body class="bg-[#131722] text-[#d1d4dc]">
 
-    <!-- 1. Top Ticker Input Bar -->
+    <!-- 1. Top Ticker Search Bar -->
     <header class="px-3 py-2 bg-[#1e222d] border-b border-[#2a2e39] flex items-center gap-2 shrink-0">
         <div class="relative flex-1">
             <input 
@@ -55,13 +55,13 @@
         </button>
     </header>
 
-    <!-- 2. Live Dynamic Peak & 0.7 Level Bar -->
+    <!-- 2. Top Info Bar: Visible Peak & Peak * 0.7 (상단 정보 표시 바) -->
     <section class="bg-[#181c27] border-b border-[#2a2e39] px-3 py-2 shrink-0 flex items-center justify-between gap-2 text-xs">
         
         <!-- Live Visible Peak Indicator -->
         <div class="flex items-center gap-1.5 bg-[#131722] px-2.5 py-1.5 rounded-lg border border-amber-500/30">
             <span class="text-amber-400 font-bold flex items-center gap-1 text-[11px]">
-                <i data-lucide="crown" class="w-3.5 h-3.5"></i> 화면 고점:
+                <i data-lucide="crown" class="w-3.5 h-3.5"></i> 고점:
             </span>
             <span id="peakDisplay" class="font-mono font-black text-sm text-amber-300">$0.00</span>
         </div>
@@ -84,35 +84,15 @@
         </button>
     </section>
 
-    <!-- 3. Interactive Chart Area (with Live Horizontal Lines) -->
+    <!-- 3. Clean Fullscreen Chart Container (No on-chart drawing lines) -->
     <main class="flex-1 w-full relative bg-[#131722]">
         <div id="chartContainer" class="w-full h-full"></div>
-
-        <!-- Dynamic Floating Chart HUD -->
-        <div class="absolute top-2 left-2 pointer-events-none bg-[#1e222d]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#363a45] shadow-xl text-xs font-mono flex items-center gap-2.5">
-            <div class="flex items-center gap-1">
-                <span class="w-2.5 h-0.5 bg-amber-400 inline-block"></span>
-                <span class="text-slate-400 text-[10px]">화면고점:</span>
-                <span id="hudPeak" class="text-amber-300 font-bold text-xs">$0.00</span>
-            </div>
-            <div class="w-[1px] h-3.5 bg-slate-700"></div>
-            <div class="flex items-center gap-1">
-                <span class="w-2.5 h-0.5 bg-emerald-400 inline-block"></span>
-                <span class="text-slate-400 text-[10px]">0.7 매수선:</span>
-                <span id="hudTarget07" class="text-emerald-300 font-bold text-xs">$0.00</span>
-            </div>
-        </div>
-
-        <!-- Bottom Gesture Guide -->
-        <div class="absolute bottom-2 right-2 pointer-events-none text-[10px] text-slate-500 font-mono bg-[#131722]/80 px-2 py-0.5 rounded border border-slate-800">
-            차트를 좌우로 이동/줌하면 화면 내 고점이 실시간 갱신됩니다
-        </div>
     </main>
 
     <script>
         lucide.createIcons();
 
-        // Realistic Baseline Data Profiles for popular tickers
+        // Baseline Data Profiles for popular tickers
         const TICKER_CONFIGS = {
             'MU': { high: 1255.00, low: 450.00, currency: '$', isKRW: false },
             'NVDA': { high: 240.00, low: 155.00, currency: '$', isKRW: false },
@@ -126,8 +106,6 @@
 
         let chart = null;
         let candleSeries = null;
-        let peakPriceLine = null;      // Horizontal line at highest visible price (Parallel to X-Axis)
-        let target07PriceLine = null;  // Horizontal line at Peak * 0.7 (-30% level)
         let currentCandles = [];
         let currentCurrency = '$';
         let currentIsKRW = false;
@@ -140,7 +118,7 @@
             return `$${val.toFixed(2)}`;
         }
 
-        // Generate 250 bars (~1 year) of rich candlestick data with multiple natural peaks
+        // Generate candlestick data with natural price waves
         function generateStockData(ticker) {
             ticker = ticker.toUpperCase().replace('KRX:', '');
             const isKRW = /^\d{6}$/.test(ticker);
@@ -169,7 +147,7 @@
             }
 
             let price = minPrice + (maxPrice - minPrice) * 0.35;
-            const mainPeakBar = 180; // Main ATH Peak
+            const mainPeakBar = 180;
 
             for (let i = 0; i < totalBars; i++) {
                 if (date.getDay() === 0) date.setDate(date.getDate() + 1);
@@ -195,7 +173,7 @@
                 let high = Math.max(open, close) + Math.abs(rand() * (maxPrice - minPrice) * 0.015);
                 let low = Math.min(open, close) - Math.abs(rand() * (maxPrice - minPrice) * 0.015);
 
-                if (i === mainPeakBar) high = maxPrice; // Guaranteed exact peak
+                if (i === mainPeakBar) high = maxPrice;
                 if (high >= maxPrice && i !== mainPeakBar) high = maxPrice * 0.985;
 
                 const roundFn = (v) => currentIsKRW ? Math.round(v) : parseFloat(v.toFixed(2));
@@ -214,7 +192,7 @@
             return candles;
         }
 
-        // Initialize Lightweight Charts
+        // Initialize Clean Chart (No on-chart drawing lines)
         function initChart() {
             const container = document.getElementById('chartContainer');
             container.innerHTML = '';
@@ -236,7 +214,7 @@
                 },
                 rightPriceScale: {
                     borderColor: '#2a2e39',
-                    scaleMargins: { top: 0.12, bottom: 0.12 },
+                    scaleMargins: { top: 0.1, bottom: 0.1 },
                     autoScale: true,
                 },
                 timeScale: {
@@ -266,32 +244,13 @@
                 wickDownColor: '#f23645',
             });
 
-            // Pre-create the 2 horizontal lines (Peak Line and 0.7 Target Line) for zero-lag smooth updates
-            peakPriceLine = candleSeries.createPriceLine({
-                price: 0,
-                color: '#f59e0b', // Gold Solid Horizontal Line
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Solid,
-                axisLabelVisible: true,
-                title: '고점'
-            });
-
-            target07PriceLine = candleSeries.createPriceLine({
-                price: 0,
-                color: '#10b981', // Emerald Dashed Horizontal Line
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: '0.7 지점 (-30%)'
-            });
-
-            // Core Real-Time Event: Whenever visible range changes (Zoom, Pan, Scroll)
+            // Real-Time Event: Whenever visible range changes (Zoom, Pan, Scroll)
             chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
                 if (!range || !currentCandles.length) return;
                 if (!isUpdating) {
                     isUpdating = true;
                     requestAnimationFrame(() => {
-                        updateVisiblePeakAndLines(range);
+                        updateVisiblePeak(range);
                         isUpdating = false;
                     });
                 }
@@ -308,17 +267,16 @@
             });
         }
 
-        // Real-Time Calculation: Extract all visible candles, find Peak, and draw Horizontal Lines on Chart
-        function updateVisiblePeakAndLines(logicalRange) {
+        // Real-Time Calculation: Extract visible candles and update top display values only
+        function updateVisiblePeak(logicalRange) {
             if (!currentCandles.length) return;
 
-            // 1. Get index bounds of currently visible candles on screen
             const fromIdx = Math.max(0, Math.floor(logicalRange.from));
             const toIdx = Math.min(currentCandles.length - 1, Math.ceil(logicalRange.to));
 
             if (fromIdx > toIdx) return;
 
-            // 2. Extract and find the Highest High within the currently visible candles
+            // Find highest high in visible range
             let visiblePeak = -Infinity;
             for (let i = fromIdx; i <= toIdx; i++) {
                 const c = currentCandles[i];
@@ -329,39 +287,20 @@
 
             if (visiblePeak === -Infinity || visiblePeak <= 0) return;
 
-            // 3. Calculate 0.7 Level (Peak * 0.7 = -30% Drop)
             const target07 = visiblePeak * 0.70;
 
-            const formattedPeak = formatPrice(visiblePeak);
-            const formatted07 = formatPrice(target07);
-
-            // 4. Update the 2 Horizontal Lines Directly on Chart (Zero Lag)
-            peakPriceLine.applyOptions({
-                price: visiblePeak,
-                title: `고점: ${formattedPeak}`
-            });
-
-            target07PriceLine.applyOptions({
-                price: target07,
-                title: `고점×0.7 (-30%): ${formatted07}`
-            });
-
-            // 5. Update Header Displays
-            document.getElementById('peakDisplay').textContent = formattedPeak;
-            document.getElementById('target07Display').textContent = formatted07;
-            document.getElementById('hudPeak').textContent = formattedPeak;
-            document.getElementById('hudTarget07').textContent = formatted07;
+            // Update Top Header Display ONLY (No lines drawn on chart)
+            document.getElementById('peakDisplay').textContent = formatPrice(visiblePeak);
+            document.getElementById('target07Display').textContent = formatPrice(target07);
         }
 
-        // Load Ticker Chart
+        // Load Ticker Data
         function loadTicker(ticker) {
             ticker = ticker.trim().toUpperCase() || 'MU';
 
-            // 1. Generate & Set Data
             currentCandles = generateStockData(ticker);
             candleSeries.setData(currentCandles);
 
-            // 2. Set Default View Range (Focus on recent ~90 bars)
             const total = currentCandles.length;
             chart.timeScale().setVisibleLogicalRange({
                 from: Math.max(0, total - 90),
