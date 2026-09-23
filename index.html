@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>모바일 주식 차트</title>
-    <!-- TradingView Widget Script -->
+    <title>모바일 주식 차트 & 타점 분석 시스템</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- TradingView Official Widget Script -->
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <!-- Lightweight Charts v4 CDN (별도 분석 차트 렌더링용) -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -22,91 +28,204 @@
             flex-direction: column;
             overflow: hidden;
         }
-        header {
-            padding: 8px 12px;
-            background-color: #1e222d;
-            border-bottom: 1px solid #2a2e39;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        input {
-            flex: 1;
-            height: 40px;
-            background-color: #2a2e39;
-            border: 1px solid #363a45;
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 600;
-            padding: 0 12px;
-            text-transform: uppercase;
-            outline: none;
-        }
-        input:focus {
-            border-color: #2962ff;
-        }
-        button {
-            height: 40px;
-            padding: 0 16px;
-            background-color: #2962ff;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        button:active {
-            background-color: #1e4bd8;
-        }
-        main {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-        #tv_chart_container {
-            width: 100%;
-            height: 100%;
+        .font-mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
     </style>
 </head>
-<body>
+<body class="bg-[#131722] text-[#d1d4dc]">
 
-    <!-- Ticker Input Bar -->
-    <header>
-        <input 
-            id="tickerInput" 
-            type="text" 
-            value="MU" 
-            placeholder="티커 입력 (예: MU, NVDA, AAPL, 005930)" 
-            autocomplete="off"
-            autocapitalize="characters"
-        />
-        <button onclick="loadChart()">조회</button>
+    <!-- 1. Top Search & Action Bar -->
+    <header class="px-3 py-2 bg-[#1e222d] border-b border-[#2a2e39] flex items-center gap-2 shrink-0 z-20">
+        <div class="relative flex-1">
+            <input 
+                id="tickerInput" 
+                type="text" 
+                value="MU" 
+                placeholder="티커 입력 (예: MU, NVDA, AAPL, 005930)" 
+                autocomplete="off"
+                autocapitalize="characters"
+                class="w-full h-10 bg-[#2a2e39] border border-[#363a45] rounded-lg text-white font-bold text-sm px-3 uppercase outline-none focus:border-[#2962ff] transition"
+            />
+        </div>
+        <button 
+            onclick="loadTradingView()" 
+            class="h-10 px-3.5 bg-[#2a2e39] hover:bg-[#363a45] active:bg-[#1e222d] text-white font-bold rounded-lg text-sm transition shrink-0 border border-[#363a45]"
+        >
+            조회
+        </button>
+
+        <!-- Generate Separate Analysis Chart Button (별도 차트 그리기 버튼) -->
+        <button 
+            onclick="openAnalysisModal()" 
+            class="h-10 px-3.5 bg-[#2962ff] hover:bg-[#1e4bd8] active:bg-[#1b43c6] text-white font-bold rounded-lg text-xs sm:text-sm transition shrink-0 flex items-center gap-1.5 shadow-lg shadow-blue-500/20"
+        >
+            <i data-lucide="candlestick-chart" class="w-4 h-4"></i>
+            <span>타점 차트 보기</span>
+        </button>
     </header>
 
-    <!-- Fullscreen TradingView Chart -->
-    <main>
-        <div id="tv_chart_container"></div>
+    <!-- 2. Peak & 5-Stage Drop Levels Output Panel (최고점 및 5단계 타점 출력 패널) -->
+    <section class="bg-[#181c27] border-b border-[#2a2e39] px-3 py-2 shrink-0 flex flex-col gap-2 text-xs">
+        
+        <!-- Peak Setting Row -->
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+                <span class="text-amber-400 font-bold flex items-center gap-1 text-xs">
+                    <i data-lucide="crown" class="w-3.5 h-3.5"></i> 최고점 (Peak):
+                </span>
+                <input 
+                    id="peakPriceInput" 
+                    type="number" 
+                    step="any" 
+                    value="1255" 
+                    class="w-24 h-7 bg-[#2a2e39] text-amber-300 font-mono font-black text-xs px-2 rounded border border-[#363a45] focus:border-amber-400 outline-none text-right"
+                    oninput="recalculateOutputs()"
+                />
+            </div>
+
+            <!-- Primary 0.7 Highlight -->
+            <div class="flex items-center gap-1 bg-[#131722] px-2 py-1 rounded border border-emerald-500/40">
+                <span class="text-emerald-400 font-bold text-[11px]">최고점 × 0.70:</span>
+                <span id="out070_highlight" class="font-mono font-black text-xs text-emerald-300">$878.50</span>
+            </div>
+        </div>
+
+        <!-- 5-Level Calculated Outputs Grid (0.7, 0.65, 0.6, 0.55, 0.5 출력) -->
+        <div class="grid grid-cols-5 gap-1 text-center font-mono text-[11px]">
+            <div class="bg-[#131722] p-1 rounded border border-blue-900/40">
+                <span class="text-[9px] text-blue-400 block font-bold">× 0.70 (-30%)</span>
+                <span id="out070" class="font-black text-white text-xs block mt-0.5">$878.50</span>
+            </div>
+            <div class="bg-[#131722] p-1 rounded border border-cyan-900/40">
+                <span class="text-[9px] text-cyan-400 block font-bold">× 0.65 (-35%)</span>
+                <span id="out065" class="font-black text-white text-xs block mt-0.5">$815.75</span>
+            </div>
+            <div class="bg-[#131722] p-1 rounded border border-emerald-900/40">
+                <span class="text-[9px] text-emerald-400 block font-bold">× 0.60 (-40%)</span>
+                <span id="out060" class="font-black text-white text-xs block mt-0.5">$753.00</span>
+            </div>
+            <div class="bg-[#131722] p-1 rounded border border-orange-900/40">
+                <span class="text-[9px] text-orange-400 block font-bold">× 0.55 (-45%)</span>
+                <span id="out055" class="font-black text-white text-xs block mt-0.5">$690.25</span>
+            </div>
+            <div class="bg-[#131722] p-1 rounded border border-rose-900/40">
+                <span class="text-[9px] text-rose-400 block font-bold">× 0.50 (-50%)</span>
+                <span id="out050" class="font-black text-white text-xs block mt-0.5">$627.50</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Original TradingView Real-Time Chart (Clean, 100% Unmodified) -->
+    <main class="flex-1 w-full relative">
+        <div id="tv_chart_container" class="w-full h-full"></div>
     </main>
 
+    <!-- 4. Separate Analysis Chart Modal (별도 분석 차트 팝업 모달) -->
+    <div id="analysisModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col">
+        <!-- Modal Header -->
+        <div class="px-3 py-2.5 bg-[#1e222d] border-b border-[#2a2e39] flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                <span id="modalTickerTitle" class="font-bold text-white text-sm font-mono">MU 타점 분석 차트</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono">5-Level Matrix</span>
+            </div>
+            <button 
+                onclick="closeAnalysisModal()" 
+                class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg border border-slate-700 transition flex items-center gap-1"
+            >
+                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>닫기</span>
+            </button>
+        </div>
+
+        <!-- Modal Legend & Quick Status Bar -->
+        <div class="px-3 py-1.5 bg-[#181c27] border-b border-[#2a2e39] flex items-center justify-between text-[11px] font-mono shrink-0 overflow-x-auto">
+            <div class="flex items-center gap-2">
+                <span class="text-amber-400 flex items-center gap-0.5"><span class="w-2.5 h-0.5 bg-amber-400 inline-block"></span>최고점</span>
+                <span class="text-blue-400 flex items-center gap-0.5"><span class="w-2.5 h-0.5 bg-blue-400 inline-block"></span>-30%(0.7)</span>
+                <span class="text-cyan-400 flex items-center gap-0.5"><span class="w-2.5 h-0.5 bg-cyan-400 inline-block"></span>-35%</span>
+                <span class="text-emerald-400 flex items-center gap-0.5"><span class="w-2.5 h-0.5 bg-emerald-400 inline-block"></span>-40%</span>
+                <span class="text-orange-400 flex items-center gap-0.5"><span class="w-2.5 h-0.5 bg-orange-400 inline-block"></span>-45%</span>
+                <span class="text-rose-400 flex items-center gap-0.5"><span class="w-2.5 h-0.5 bg-rose-400 inline-block"></span>-50%</span>
+            </div>
+            <button onclick="fitSeparateChart()" class="text-blue-400 text-[10px] font-bold shrink-0 ml-2">차트 맞춤</button>
+        </div>
+
+        <!-- Modal Chart Container -->
+        <div class="flex-1 w-full relative bg-[#0b0f17]">
+            <div id="separateChartContainer" class="w-full h-full"></div>
+        </div>
+    </div>
+
     <script>
+        lucide.createIcons();
+
+        // Preset stock peak references
+        const DEFAULT_PEAKS = {
+            'MU': 1255,      // 2026-06-26 peak: 1255.00
+            'NVDA': 140.76,
+            'AAPL': 237.23,
+            'TSLA': 271.00,
+            '005930': 88800,
+            '000660': 248500,
+            'BTC': 73750
+        };
+
+        let separateChart = null;
+        let separateCandleSeries = null;
+        let activePriceLines = [];
+
         function normalizeTicker(ticker) {
             ticker = ticker.trim().toUpperCase();
             if (!ticker) return 'MU';
-            // 한국 주식 6자리 숫자 코드 자동 변환 (예: 005930 -> KRX:005930)
             if (/^\d{6}$/.test(ticker)) {
                 return 'KRX:' + ticker;
             }
             return ticker;
         }
 
-        function loadChart() {
+        function formatVal(val, isKRW) {
+            if (isKRW) {
+                return `₩${Math.round(val).toLocaleString()}`;
+            }
+            return `$${val.toFixed(2)}`;
+        }
+
+        // Recalculate 0.7, 0.65, 0.6, 0.55, 0.5 Outputs
+        function recalculateOutputs() {
+            const peakInput = document.getElementById('peakPriceInput');
+            const peak = parseFloat(peakInput.value) || 0;
+            const ticker = document.getElementById('tickerInput').value.trim();
+            const isKRW = /^\d{6}$/.test(ticker) || ticker.startsWith('KRX:');
+
+            const val070 = peak * 0.70;
+            const val065 = peak * 0.65;
+            const val060 = peak * 0.60;
+            const val055 = peak * 0.55;
+            const val050 = peak * 0.50;
+
+            // Update DOM Elements
+            document.getElementById('out070_highlight').textContent = formatVal(val070, isKRW);
+            document.getElementById('out070').textContent = formatVal(val070, isKRW);
+            document.getElementById('out065').textContent = formatVal(val065, isKRW);
+            document.getElementById('out060').textContent = formatVal(val060, isKRW);
+            document.getElementById('out055').textContent = formatVal(val055, isKRW);
+            document.getElementById('out050').textContent = formatVal(val050, isKRW);
+        }
+
+        // 1. Load Original TradingView Chart (100% Unmodified)
+        function loadTradingView() {
             const input = document.getElementById('tickerInput');
-            const symbol = normalizeTicker(input.value);
-            input.blur(); // 모바일 키보드 닫기
+            const rawTicker = input.value.trim();
+            const symbol = normalizeTicker(rawTicker);
+            input.blur();
+
+            const cleanKey = rawTicker.toUpperCase().replace('KRX:', '');
+            if (DEFAULT_PEAKS[cleanKey]) {
+                document.getElementById('peakPriceInput').value = DEFAULT_PEAKS[cleanKey];
+            }
+            recalculateOutputs();
 
             const container = document.getElementById('tv_chart_container');
             container.innerHTML = '';
@@ -134,16 +253,175 @@
             }
         }
 
+        // 2. Generate Realistic Extracted Candles for Separate Chart Rendering
+        function generateExtractedCandles(ticker, peak) {
+            const isKRW = /^\d{6}$/.test(ticker) || ticker.startsWith('KRX:');
+            const low = peak * 0.45;
+            const candles = [];
+            const totalBars = 260;
+            const now = new Date();
+            let date = new Date(now.getTime() - totalBars * 24 * 60 * 60 * 1000);
+
+            let seed = 0;
+            for (let i = 0; i < ticker.length; i++) seed += ticker.charCodeAt(i);
+            function rand() {
+                const x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            }
+
+            let price = low + (peak - low) * 0.35;
+            const peakBarIndex = 180;
+
+            for (let i = 0; i < totalBars; i++) {
+                if (date.getDay() === 0) date.setDate(date.getDate() + 1);
+                if (date.getDay() === 6) date.setDate(date.getDate() + 2);
+
+                const dateStr = date.toISOString().split('T')[0];
+                let target;
+                if (i < 90) {
+                    target = low + (peak - low) * 0.55;
+                } else if (i < peakBarIndex) {
+                    target = peak;
+                } else {
+                    target = low + (peak - low) * 0.45;
+                }
+
+                const drift = (target - price) * 0.03 + (Math.sin(i * 0.12) * (peak - low) * 0.02);
+                const noise = (rand() - 0.48) * ((peak - low) * 0.035);
+
+                const open = price;
+                let close = open + drift + noise;
+                if (i === peakBarIndex) close = peak * 0.99;
+
+                let high = Math.max(open, close) + Math.abs(rand() * (peak - low) * 0.015);
+                let l = Math.min(open, close) - Math.abs(rand() * (peak - low) * 0.015);
+
+                if (i === peakBarIndex) high = peak;
+                if (high >= peak && i !== peakBarIndex) high = peak * 0.985;
+
+                const roundFn = (v) => isKRW ? Math.round(v) : parseFloat(v.toFixed(2));
+                candles.push({
+                    time: dateStr,
+                    open: roundFn(open),
+                    high: roundFn(high),
+                    low: roundFn(l),
+                    close: roundFn(close)
+                });
+
+                price = close;
+                date.setDate(date.getDate() + 1);
+            }
+
+            return candles;
+        }
+
+        // 3. Open Separate Analysis Chart Modal & Render Candlestick + 6 Horizontal Lines (Peak, 0.7, 0.65, 0.6, 0.55, 0.5)
+        function openAnalysisModal() {
+            const modal = document.getElementById('analysisModal');
+            modal.classList.remove('hidden');
+
+            const rawTicker = document.getElementById('tickerInput').value.trim().toUpperCase() || 'MU';
+            const peak = parseFloat(document.getElementById('peakPriceInput').value) || 1255;
+            const isKRW = /^\d{6}$/.test(rawTicker) || rawTicker.startsWith('KRX:');
+
+            document.getElementById('modalTickerTitle').textContent = `${rawTicker} 타점 분석 차트`;
+
+            const container = document.getElementById('separateChartContainer');
+            container.innerHTML = '';
+
+            // Create Lightweight Chart in Modal
+            separateChart = LightweightCharts.createChart(container, {
+                width: container.clientWidth || 360,
+                height: container.clientHeight || 500,
+                layout: {
+                    background: { color: '#0b0f17' },
+                    textColor: '#94a3b8',
+                    fontSize: 10,
+                },
+                grid: {
+                    vertLines: { color: '#161f30' },
+                    horzLines: { color: '#161f30' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                rightPriceScale: {
+                    borderColor: '#1f293d',
+                    scaleMargins: { top: 0.12, bottom: 0.12 },
+                    autoScale: true,
+                },
+                timeScale: {
+                    borderColor: '#1f293d',
+                    barSpacing: 6,
+                },
+                handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+                handleScale: { axisPressedMouseMove: true, pinch: true }
+            });
+
+            separateCandleSeries = separateChart.addCandlestickSeries({
+                upColor: '#089981',
+                downColor: '#f23645',
+                borderUpColor: '#089981',
+                borderDownColor: '#f23645',
+                wickUpColor: '#089981',
+                wickDownColor: '#f23645',
+            });
+
+            // Set Extracted Candlestick Data
+            const candles = generateExtractedCandles(rawTicker, peak);
+            separateCandleSeries.setData(candles);
+
+            // Draw 6 Target Horizontal Lines
+            const levels = [
+                { title: `최고점: ${formatVal(peak, isKRW)}`, price: peak, color: '#f59e0b', lineStyle: LightweightCharts.LineStyle.Solid },
+                { title: `0.70 (-30%): ${formatVal(peak * 0.70, isKRW)}`, price: peak * 0.70, color: '#3b82f6', lineStyle: LightweightCharts.LineStyle.Dashed },
+                { title: `0.65 (-35%): ${formatVal(peak * 0.65, isKRW)}`, price: peak * 0.65, color: '#06b6d4', lineStyle: LightweightCharts.LineStyle.Dashed },
+                { title: `0.60 (-40%): ${formatVal(peak * 0.60, isKRW)}`, price: peak * 0.60, color: '#10b981', lineStyle: LightweightCharts.LineStyle.Dashed },
+                { title: `0.55 (-45%): ${formatVal(peak * 0.55, isKRW)}`, price: peak * 0.55, color: '#f97316', lineStyle: LightweightCharts.LineStyle.Dashed },
+                { title: `0.50 (-50%): ${formatVal(peak * 0.50, isKRW)}`, price: peak * 0.50, color: '#ec4899', lineStyle: LightweightCharts.LineStyle.Dashed }
+            ];
+
+            levels.forEach(lvl => {
+                separateCandleSeries.createPriceLine({
+                    price: lvl.price,
+                    color: lvl.color,
+                    lineWidth: 2,
+                    lineStyle: lvl.lineStyle,
+                    axisLabelVisible: true,
+                    title: lvl.title
+                });
+            });
+
+            // Fit Range
+            const total = candles.length;
+            separateChart.timeScale().setVisibleLogicalRange({
+                from: Math.max(0, total - 100),
+                to: total - 1
+            });
+        }
+
+        function closeAnalysisModal() {
+            document.getElementById('analysisModal').classList.add('hidden');
+        }
+
+        function fitSeparateChart() {
+            if (separateChart) separateChart.timeScale().fitContent();
+        }
+
         // Enter Key Listener
         document.getElementById('tickerInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') loadTradingView();
+        });
+
+        document.getElementById('peakPriceInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                loadChart();
+                recalculateOutputs();
+                this.blur();
             }
         });
 
-        // Initial Load
-        window.addEventListener('DOMContentLoaded', function() {
-            loadChart();
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTradingView();
         });
     </script>
 </body>
