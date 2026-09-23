@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>모바일 주식 차트</title>
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #131722;
+            color: #d1d4dc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        header {
+            padding: 8px 12px;
+            background-color: #1e222d;
+            border-bottom: 1px solid #2a2e39;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        input {
+            flex: 1;
+            height: 40px;
+            background-color: #2a2e39;
+            border: 1px solid #363a45;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 0 12px;
+            text-transform: uppercase;
+            outline: none;
+        }
+        input:focus {
+            border-color: #2962ff;
+        }
+        button {
+            height: 40px;
+            padding: 0 16px;
+            background-color: #2962ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:active {
+            background-color: #1e4bd8;
+        }
+        main {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        #tv_chart_container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ticker Input Bar -->
+    <header>
+        <input 
+            id="tickerInput" 
+            type="text" 
+            value="MU" 
+            placeholder="티커 입력 (예: MU, NVDA, AAPL, 005930)" 
+            autocomplete="off"
+            autocapitalize="characters"
+        />
+        <button onclick="loadChart()">조회</button>
+    </header>
+
+    <!-- Fullscreen Chart -->
+    <main>
+        <div id="tv_chart_container"></div>
+    </main>
+
+    <script>
+        function normalizeTicker(ticker) {
+            ticker = ticker.trim().toUpperCase();
+            if (!ticker) return 'MU';
+            // 한국 주식 6자리 숫자 코드 자동 변환 (예: 005930 -> KRX:005930)
+            if (/^\d{6}$/.test(ticker)) {
+                return 'KRX:' + ticker;
+            }
+            return ticker;
+        }
+
+        function loadChart() {
+            const input = document.getElementById('tickerInput');
+            const symbol = normalizeTicker(input.value);
+            input.blur(); // 모바일 키보드 닫기
+
+            const container = document.getElementById('tv_chart_container');
+            container.innerHTML = '';
+
+            const widgetDiv = document.createElement('div');
+            widgetDiv.id = 'tradingview_widget';
+            widgetDiv.style.width = '100%';
+            widgetDiv.style.height = '100%';
+            container.appendChild(widgetDiv);
+
+            if (typeof TradingView !== 'undefined') {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": symbol,
+                    "interval": "D",
+                    "timezone": "Asia/Seoul",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "kr",
+                    "toolbar_bg": "#1e222d",
+                    "enable_publishing": false,
+                    "allow_symbol_change": true,
+                    "container_id": "tradingview_widget"
+                });
+            }
+        }
+
+        // Enter Key Listener
+        document.getElementById('tickerInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                loadChart();
+            }
+        });
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadChart();
+        });
+    </script>
+</body>
+</html>
