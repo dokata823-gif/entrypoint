@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Entry Point - 화면 가시 영역 최고점 기반 동적 분할 매수선</title>
+    <title>모바일 주식 차트 - Ticker Chart</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons CDN -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- TradingView Lightweight Charts v4 CDN -->
-    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -17,616 +17,193 @@
                 extend: {
                     colors: {
                         dark: {
-                            950: '#06090e',
-                            900: '#0b101b',
-                            800: '#121a2b',
-                            700: '#1c283f',
-                            600: '#2b3c5a'
+                            950: '#070a0f',
+                            900: '#0d131f',
+                            800: '#151d2e',
+                            700: '#222f46'
                         }
-                    },
-                    fontFamily: {
-                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'SF Pro Mono', 'Menlo', 'monospace']
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+        
         * {
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
-            user-select: none;
         }
 
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #06090e;
+            background-color: #070a0f;
             color: #e2e8f0;
             overflow-x: hidden;
-            touch-action: pan-y;
+            touch-action: manipulation;
         }
 
-        html, body {
-            max-width: 100vw;
-            width: 100%;
-        }
-
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0b101b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1c283f;
-            border-radius: 2px;
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#06090e] text-slate-100 antialiased pb-8">
+<body class="h-[100dvh] flex flex-col bg-[#070a0f] text-slate-100 antialiased overflow-hidden">
 
-    <!-- Top Sticky Mobile Header -->
-    <header class="sticky top-0 z-50 bg-[#0b101b]/95 backdrop-blur-md border-b border-slate-800/80 px-3.5 py-2.5">
-        <div class="max-w-lg mx-auto flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-                    <i data-lucide="crosshair" class="w-4 h-4"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-black tracking-tight text-white">PRO ENTRY POINT</span>
-                        <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">DYNAMIC ATH</span>
+    <!-- Top Sticky Search & Ticker Bar -->
+    <header class="bg-[#0d131f] border-b border-slate-800 px-3 py-2 shrink-0 z-50">
+        <div class="max-w-2xl mx-auto space-y-2">
+            
+            <!-- Ticker Input Row -->
+            <form id="tickerForm" class="flex items-center gap-2" onsubmit="event.preventDefault(); applyTicker();">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="search" class="w-4 h-4 text-blue-400"></i>
                     </div>
+                    <input 
+                        id="tickerInput" 
+                        type="text" 
+                        value="MU" 
+                        placeholder="티커 입력 (예: MU, NVDA, AAPL, 005930)" 
+                        autocomplete="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                        class="w-full h-11 bg-slate-800/90 text-white font-mono font-bold text-sm rounded-xl pl-9 pr-8 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 focus:outline-none transition uppercase"
+                    />
+                    <button 
+                        type="button" 
+                        id="clearBtn" 
+                        class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
+                        onclick="clearInput()"
+                    >
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
                 </div>
+
+                <button 
+                    type="submit" 
+                    class="h-11 px-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/25 transition shrink-0"
+                >
+                    <span>조회</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </form>
+
+            <!-- Quick Ticker Quick-Select Chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs no-scrollbar">
+                <span class="text-[10px] text-slate-400 font-semibold shrink-0 mr-0.5">인기:</span>
+                <button onclick="setTicker('MU')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-slate-700 font-mono font-bold shrink-0 transition">MU</button>
+                <button onclick="setTicker('NVDA')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">NVDA</button>
+                <button onclick="setTicker('TSLA')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">TSLA</button>
+                <button onclick="setTicker('AAPL')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">AAPL</button>
+                <button onclick="setTicker('PLTR')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono font-semibold shrink-0 transition">PLTR</button>
+                <button onclick="setTicker('QQQ')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-blue-400 border border-slate-700 font-mono font-semibold shrink-0 transition">QQQ</button>
+                <button onclick="setTicker('KRX:005930')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-semibold shrink-0 transition">삼성전자</button>
+                <button onclick="setTicker('KRX:000660')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-semibold shrink-0 transition">SK하이닉스</button>
+                <button onclick="setTicker('BINANCE:BTCUSDT')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-yellow-400 border border-slate-700 font-mono font-semibold shrink-0 transition">BTC</button>
             </div>
 
-            <!-- Header Visible ATH Indicator -->
-            <div class="text-right">
-                <span class="text-[9px] text-slate-400 block font-medium">화면 최고가 (Visible Peak)</span>
-                <span id="headerVisibleAth" class="text-xs font-bold font-mono text-amber-400">$0.00</span>
-            </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="flex-1 w-full max-w-lg mx-auto px-3 pt-2.5 space-y-2.5">
-
-        <!-- 1. Large Touch Ticker Selector -->
-        <section class="bg-[#0b101b] border border-slate-800 rounded-2xl p-2.5 shadow-lg space-y-1.5">
-            <div class="flex items-center justify-between px-1">
-                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i>
-                    종목 선택 (미국/한국/일본 20종목)
-                </span>
-                <span id="currencyBadge" class="text-[9px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono border border-slate-700 font-bold">
-                    USD ($)
-                </span>
-            </div>
-
-            <div class="relative">
-                <select id="stockSelector" class="w-full h-11 bg-slate-800/90 text-white font-bold text-xs sm:text-sm rounded-xl pl-3 pr-10 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 focus:outline-none transition cursor-pointer">
-                    <optgroup label="🇺🇸 미국 주식 (USD - $)">
-                        <option value="MU" selected>MU • Micron Technology (마이크론)</option>
-                        <option value="NVDA">NVDA • Nvidia (엔비디아)</option>
-                        <option value="GOOGL">GOOGL • Alphabet (구글)</option>
-                        <option value="PLTR">PLTR • Palantir (팔란티어)</option>
-                        <option value="VICR">VICR • Vicor (바이코)</option>
-                        <option value="DIS">DIS • Walt Disney (월트디즈니)</option>
-                        <option value="VST">VST • Vistra (비스트라)</option>
-                        <option value="RBLX">RBLX • Roblox (로블록스)</option>
-                        <option value="WMB">WMB • Williams Companies (윌리엄스)</option>
-                        <option value="TT">TT • Trane Technologies (트레인)</option>
-                        <option value="CRCL">CRCL • Circle (서클/USD)</option>
-                    </optgroup>
-                    <optgroup label="🇰🇷 한국 주식 (KRW - ₩)">
-                        <option value="005930.KS">005930.KS • 삼성전자</option>
-                        <option value="000660.KS">000660.KS • SK하이닉스</option>
-                        <option value="207940.KS">207940.KS • 삼성바이오로직스</option>
-                        <option value="012330.KS">012330.KS • 현대모비스</option>
-                        <option value="042660.KS">042660.KS • 한화오션</option>
-                        <option value="028260.KS">028260.KS • 삼성물산</option>
-                        <option value="001040.KS">001040.KS • CJ</option>
-                    </optgroup>
-                    <optgroup label="🇯🇵 일본 주식 (JPY - ¥)">
-                        <option value="186A.T">186A.T • Astroscale Holdings (아스트로스케일)</option>
-                        <option value="2638.T">2638.T • Global X Japan Robotics & AI ETF</option>
-                    </optgroup>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                </div>
-            </div>
-        </section>
-
-        <!-- 2. Interactive Chart Area (Height ~56vh) -->
-        <section class="bg-[#0b101b] border border-slate-800 rounded-2xl p-2.5 shadow-xl relative overflow-hidden flex flex-col">
-            <!-- Chart Top Info & Quick Actions -->
-            <div class="flex items-center justify-between pb-2 mb-1 border-b border-slate-800/80">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="chartTitle" class="text-xs font-bold font-mono text-white">MU • 1D</span>
-                    <span class="text-[9px] text-slate-400 font-mono hidden sm:inline">(가시영역 줌/팬 실시간 감지)</span>
-                </div>
-                <div class="flex items-center gap-1">
-                    <button id="resetRangeBtn" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-blue-400 text-[10px] font-bold border border-slate-700 flex items-center gap-1 transition">
-                        <i data-lucide="maximize-2" class="w-3 h-3"></i> 전체
-                    </button>
-                    <button id="recent3MBtn" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold border border-slate-700 transition">
-                        최근3M
-                    </button>
-                </div>
-            </div>
-
-            <!-- Chart Container -->
-            <div class="w-full relative flex-1">
-                <div id="chartContainer" class="w-full h-[52vh] min-h-[300px] max-h-[460px] rounded-xl overflow-hidden"></div>
-                
-                <!-- Live Dynamic Floating Indicator -->
-                <div class="absolute top-2 left-2 pointer-events-none bg-slate-900/85 backdrop-blur-md px-2 py-1 rounded-lg border border-slate-800 text-[9px] font-mono text-slate-300 flex items-center gap-1.5 shadow-lg">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
-                    <span>화면 최고가: <b id="floatAthDisplay" class="text-amber-300">$0.00</b></span>
-                </div>
-            </div>
-
-            <!-- Bottom Chart Hint -->
-            <div class="mt-1.5 pt-1.5 border-t border-slate-800/60 flex items-center justify-between text-[9px] text-slate-400">
-                <div class="flex items-center gap-2">
-                    <span class="flex items-center gap-1"><span class="w-2 h-0.5 bg-amber-400 inline-block"></span>화면최고</span>
-                    <span class="flex items-center gap-1"><span class="w-2 h-0.5 bg-orange-400 inline-block"></span>-30%~-50%</span>
-                </div>
-                <span class="text-slate-500">차트를 좌우로 밀거나 줌하여 최고가를 변경해보세요</span>
-            </div>
-        </section>
-
-        <!-- 3. Real-time Summary Cards -->
-        <section class="grid grid-cols-3 gap-2">
-            <!-- Visible Peak Card -->
-            <div class="bg-[#0b101b] border border-amber-900/40 rounded-xl p-2 flex flex-col justify-between shadow-md bg-gradient-to-b from-amber-500/5 to-transparent">
-                <span class="text-[9px] text-amber-400 font-bold flex items-center gap-1">
-                    <i data-lucide="crown" class="w-3 h-3"></i> 화면 내 최고가
-                </span>
-                <span id="cardVisibleAth" class="text-xs sm:text-sm font-black font-mono text-amber-400 mt-1">$0.00</span>
-                <span class="text-[9px] text-slate-400 mt-0.5 font-mono">가시구간 100%</span>
-            </div>
-
-            <!-- Current/Latest Price Card -->
-            <div class="bg-[#0b101b] border border-slate-800 rounded-xl p-2 flex flex-col justify-between shadow-md">
-                <span class="text-[9px] text-slate-400 font-bold">최신 종가</span>
-                <span id="cardCurrentPrice" class="text-xs sm:text-sm font-black font-mono text-white mt-1">$0.00</span>
-                <span class="text-[9px] text-slate-400 mt-0.5 font-mono">현재 캔들</span>
-            </div>
-
-            <!-- Drop Rate from Peak Card -->
-            <div class="bg-[#0b101b] border border-rose-900/40 rounded-xl p-2 flex flex-col justify-between shadow-md bg-gradient-to-b from-rose-500/5 to-transparent">
-                <span class="text-[9px] text-rose-400 font-bold">최고가 대비 하락률</span>
-                <span id="cardDropRate" class="text-xs sm:text-sm font-black font-mono text-rose-400 mt-1">-0.00%</span>
-                <span id="cardDropStatus" class="text-[9px] text-slate-300 mt-0.5 font-mono">조정 진행중</span>
-            </div>
-        </section>
-
-        <!-- 4. 5-Stage Dynamic Pullback Matrix Table -->
-        <section class="bg-[#0b101b] border border-slate-800 rounded-2xl p-2.5 shadow-xl space-y-2">
-            <div class="flex items-center justify-between px-1">
-                <h3 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                    <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
-                    화면 최고점 기준 5단계 하락 지지선
-                </h3>
-                <span class="text-[9px] text-slate-400 font-mono font-semibold">Live Dynamic Sync</span>
-            </div>
-
-            <!-- Compact Mobile Grid Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="text-[10px] text-slate-400 border-b border-slate-800 bg-slate-800/40 font-semibold font-mono">
-                            <th class="py-1.5 px-2 rounded-l-lg">단계 (하락률)</th>
-                            <th class="py-1.5 px-2 text-right">목표 지지선</th>
-                            <th class="py-1.5 px-2 text-right">현재가 대비 갭</th>
-                            <th class="py-1.5 px-2 rounded-r-lg text-center">상태</th>
-                        </tr>
-                    </thead>
-                    <tbody id="levelsTableBody" class="divide-y divide-slate-800/60 font-mono">
-                        <!-- Populated via Javascript dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
+    <!-- Main Fullscreen Chart Area -->
+    <main class="flex-1 w-full relative bg-[#070a0f]">
+        <div id="tradingview_chart_container" class="w-full h-full"></div>
     </main>
 
-    <!-- Footer -->
-    <footer class="mt-4 border-t border-slate-800/60 py-3 text-center text-[9px] text-slate-500 font-mono">
-        Pro Entry Point • Real-Time Visible Range High Detector & Dynamic Pullback Support Engine
-    </footer>
-
-    <!-- Logic Script -->
+    <!-- Script Logic -->
     <script>
         lucide.createIcons();
 
-        // 20 Stocks Configuration with Base Real Price Ranges and Currencies
-        const STOCKS_DATABASE = {
-            // US Stocks (USD - $)
-            'MU': { name: 'Micron Technology (마이크론)', currency: '$', locale: 'en-US', baseHigh: 157.50, isKRW: false, isJPY: false },
-            'NVDA': { name: 'Nvidia (엔비디아)', currency: '$', locale: 'en-US', baseHigh: 140.76, isKRW: false, isJPY: false },
-            'GOOGL': { name: 'Alphabet (구글)', currency: '$', locale: 'en-US', baseHigh: 191.75, isKRW: false, isJPY: false },
-            'PLTR': { name: 'Palantir (팔란티어)', currency: '$', locale: 'en-US', baseHigh: 44.20, isKRW: false, isJPY: false },
-            'VICR': { name: 'Vicor (바이코)', currency: '$', locale: 'en-US', baseHigh: 98.40, isKRW: false, isJPY: false },
-            'DIS': { name: 'Walt Disney (월트디즈니)', currency: '$', locale: 'en-US', baseHigh: 123.74, isKRW: false, isJPY: false },
-            'VST': { name: 'Vistra (비스트라)', currency: '$', locale: 'en-US', baseHigh: 143.86, isKRW: false, isJPY: false },
-            'RBLX': { name: 'Roblox (로블록스)', currency: '$', locale: 'en-US', baseHigh: 63.85, isKRW: false, isJPY: false },
-            'WMB': { name: 'Williams Companies (윌리엄스)', currency: '$', locale: 'en-US', baseHigh: 59.20, isKRW: false, isJPY: false },
-            'TT': { name: 'Trane Technologies (트레인)', currency: '$', locale: 'en-US', baseHigh: 408.50, isKRW: false, isJPY: false },
-            'CRCL': { name: 'Circle Internet Financial (서클)', currency: '$', locale: 'en-US', baseHigh: 48.50, isKRW: false, isJPY: false },
+        let currentSymbol = 'MU';
+        const tickerInput = document.getElementById('tickerInput');
+        const clearBtn = document.getElementById('clearBtn');
 
-            // Korean Stocks (KRW - ₩)
-            '005930.KS': { name: '삼성전자', currency: '₩', locale: 'ko-KR', baseHigh: 88800, isKRW: true, isJPY: false },
-            '000660.KS': { name: 'SK하이닉스', currency: '₩', locale: 'ko-KR', baseHigh: 248500, isKRW: true, isJPY: false },
-            '207940.KS': { name: '삼성바이오로직스', currency: '₩', locale: 'ko-KR', baseHigh: 1120000, isKRW: true, isJPY: false },
-            '012330.KS': { name: '현대모비스', currency: '₩', locale: 'ko-KR', baseHigh: 265000, isKRW: true, isJPY: false },
-            '042660.KS': { name: '한화오션', currency: '₩', locale: 'ko-KR', baseHigh: 41850, isKRW: true, isJPY: false },
-            '028260.KS': { name: '삼성물산', currency: '₩', locale: 'ko-KR', baseHigh: 172000, isKRW: true, isJPY: false },
-            '001040.KS': { name: 'CJ', currency: '₩', locale: 'ko-KR', baseHigh: 142500, isKRW: true, isJPY: false },
+        // Format symbol for Korean / Crypto / US stocks
+        function normalizeSymbol(symbol) {
+            symbol = symbol.trim().toUpperCase();
+            if (!symbol) return 'MU';
 
-            // Japanese Stocks (JPY - ¥)
-            '186A.T': { name: 'Astroscale Holdings', currency: '¥', locale: 'ja-JP', baseHigh: 1280, isKRW: false, isJPY: true },
-            '2638.T': { name: 'Global X Japan Robotics & AI ETF', currency: '¥', locale: 'ja-JP', baseHigh: 3450, isKRW: false, isJPY: true }
-        };
-
-        // 5 Dynamic Pullback Levels: Color gradient from Orange -> Scarlet -> Deep Red/Purple
-        const PULLBACK_LEVELS = [
-            { id: 1, name: '1차 지지선', rate: 0.30, pctText: '-30%', color: '#f97316', bgClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-            { id: 2, name: '2차 지지선', rate: 0.35, pctText: '-35%', color: '#ea580c', bgClass: 'bg-amber-600/20 text-amber-400 border-amber-600/30' },
-            { id: 3, name: '3차 지지선', rate: 0.40, pctText: '-40%', color: '#e11d48', bgClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
-            { id: 4, name: '4차 지지선', rate: 0.45, pctText: '-45%', color: '#dc2626', bgClass: 'bg-red-600/20 text-red-400 border-red-600/30' },
-            { id: 5, name: '5차 지지선', rate: 0.50, pctText: '-50%', color: '#9333ea', bgClass: 'bg-purple-600/20 text-purple-400 border-purple-600/30' }
-        ];
-
-        // Global Chart & Lines Reference
-        let chart = null;
-        let candleSeries = null;
-        let peakPriceLine = null;
-        let dynamicPriceLines = [];
-        let currentCandles = [];
-        let currentStockKey = 'MU';
-        let isUpdating = false;
-
-        // Price Formatter Helper
-        function formatPrice(val, meta) {
-            if (meta.isKRW || meta.isJPY) {
-                return `${meta.currency}${Math.round(val).toLocaleString()}`;
+            // 한국 주식 6자리 숫자 코드 (예: 005930 -> KRX:005930)
+            if (/^\d{6}$/.test(symbol)) {
+                return `KRX:${symbol}`;
             }
-            return `${meta.currency}${val.toFixed(2)}`;
+            return symbol;
         }
 
-        // Generate 1.5 Years (~380 bars) of Realistic Daily Candlesticks with Multiple Natural Waves
-        function generateStockData(ticker) {
-            const meta = STOCKS_DATABASE[ticker];
-            const baseHigh = meta.baseHigh;
-            const candles = [];
-            const totalBars = 380;
-            const now = new Date();
-            let date = new Date(now.getTime() - totalBars * 24 * 60 * 60 * 1000);
+        // Render TradingView Real-Time Mobile Chart
+        function loadChart(symbol) {
+            const normalized = normalizeSymbol(symbol);
+            currentSymbol = normalized;
 
-            // Seed generator for reproducible natural waves
-            let seed = 0;
-            for (let i = 0; i < ticker.length; i++) seed += ticker.charCodeAt(i);
-            function rand() {
-                const x = Math.sin(seed++) * 10000;
-                return x - Math.floor(x);
-            }
-
-            let price = baseHigh * 0.55;
-            for (let i = 0; i < totalBars; i++) {
-                if (date.getDay() === 0) date.setDate(date.getDate() + 1);
-                if (date.getDay() === 6) date.setDate(date.getDate() + 2);
-
-                const dateStr = date.toISOString().split('T')[0];
-                
-                // Natural multi-cycle waves: Wave 1 (small peak), Wave 2 (ATH peak ~day 280), Wave 3 (pullback/rebound)
-                let waveTarget;
-                if (i < 140) {
-                    waveTarget = baseHigh * 0.75;
-                } else if (i < 280) {
-                    waveTarget = baseHigh;
-                } else {
-                    waveTarget = baseHigh * 0.65;
-                }
-
-                const drift = (waveTarget - price) * 0.025 + (Math.sin(i * 0.08) * baseHigh * 0.015);
-                const noise = (rand() - 0.48) * (baseHigh * 0.035);
-
-                const open = price;
-                let close = open + drift + noise;
-                if (i === 275) close = baseHigh * 0.99; // Peak bar
-
-                let high = Math.max(open, close) + Math.abs(rand() * baseHigh * 0.015);
-                let low = Math.min(open, close) - Math.abs(rand() * baseHigh * 0.015);
-
-                if (i === 275) high = baseHigh; // Set actual absolute ATH on day 275
-                if (high > baseHigh && i !== 275) high = baseHigh * 0.985;
-
-                const roundFn = (v) => meta.isKRW ? Math.round(v) : parseFloat(v.toFixed(2));
-                candles.push({
-                    time: dateStr,
-                    open: roundFn(open),
-                    high: roundFn(high),
-                    low: roundFn(low),
-                    close: roundFn(close)
-                });
-
-                price = close;
-                date.setDate(date.getDate() + 1);
-            }
-
-            return candles;
-        }
-
-        // Initialize Chart
-        function initChart() {
-            const container = document.getElementById('chartContainer');
+            const container = document.getElementById('tradingview_chart_container');
             container.innerHTML = '';
 
-            chart = LightweightCharts.createChart(container, {
-                width: container.clientWidth || 360,
-                height: container.clientHeight || 340,
-                layout: {
-                    background: { color: '#0b101b' },
-                    textColor: '#94a3b8',
-                    fontSize: 10,
-                },
-                grid: {
-                    vertLines: { color: '#141d2e' },
-                    horzLines: { color: '#141d2e' },
-                },
-                crosshair: {
-                    mode: LightweightCharts.CrosshairMode.Normal,
-                    vertLine: { color: '#475569', width: 1, style: LightweightCharts.LineStyle.Dashed },
-                    horzLine: { color: '#475569', width: 1, style: LightweightCharts.LineStyle.Dashed }
-                },
-                rightPriceScale: {
-                    borderColor: '#1e293b',
-                    scaleMargins: { top: 0.12, bottom: 0.12 },
-                    autoScale: true,
-                },
-                timeScale: {
-                    borderColor: '#1e293b',
-                    fixLeftEdge: true,
-                    fixRightEdge: true,
-                    barSpacing: 6,
-                    minBarSpacing: 2,
-                },
-                handleScroll: {
-                    mouseWheel: true,
-                    pressedMouseMove: true,
-                    horzTouchDrag: true,
-                    vertTouchDrag: false
-                },
-                handleScale: {
-                    axisPressedMouseMove: true,
-                    pinch: true,
-                }
-            });
+            const widgetDiv = document.createElement('div');
+            widgetDiv.id = 'tv_widget_elem';
+            widgetDiv.className = 'w-full h-full';
+            container.appendChild(widgetDiv);
 
-            candleSeries = chart.addCandlestickSeries({
-                upColor: '#10b981',
-                downColor: '#ef4444',
-                borderUpColor: '#10b981',
-                borderDownColor: '#ef4444',
-                wickUpColor: '#10b981',
-                wickDownColor: '#ef4444',
-            });
-
-            // Pre-create the 6 Horizontal Lines (1 Peak Line + 5 Dynamic Pullback Lines) for zero-lag smooth reuse
-            peakPriceLine = candleSeries.createPriceLine({
-                price: 0,
-                color: '#f59e0b',
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Solid,
-                axisLabelVisible: true,
-                title: '화면최고가'
-            });
-
-            dynamicPriceLines = PULLBACK_LEVELS.map(lvl => {
-                return candleSeries.createPriceLine({
-                    price: 0,
-                    color: lvl.color,
-                    lineWidth: 1.5,
-                    lineStyle: LightweightCharts.LineStyle.Dashed,
-                    axisLabelVisible: true,
-                    title: `${lvl.pctText}`
+            if (typeof TradingView !== 'undefined') {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": normalized,
+                    "interval": "D",
+                    "timezone": "Asia/Seoul",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "kr",
+                    "toolbar_bg": "#0d131f",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "save_image": false,
+                    "container_id": "tv_widget_elem",
+                    "studies": [
+                        "MASimple@tv-basicstudies",
+                        "Volume@tv-basicstudies"
+                    ],
+                    "disabled_features": [
+                        "header_screenshot",
+                        "header_saveload"
+                    ]
                 });
-            });
-
-            // Core Feature: Subscribe to Visible Range Change (Real-Time Dynamic Recalculation)
-            chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-                if (!range || !currentCandles.length) return;
-                if (!isUpdating) {
-                    isUpdating = true;
-                    requestAnimationFrame(() => {
-                        handleVisibleRangeChange(range);
-                        isUpdating = false;
-                    });
-                }
-            });
-
-            // Responsive Resize
-            const resizeObserver = new ResizeObserver(entries => {
-                if (!entries.length || !chart) return;
-                const { width, height } = entries[0].contentRect;
-                chart.applyOptions({ width, height });
-            });
-            resizeObserver.observe(container);
+            }
         }
 
-        // Real-Time Calculation on Visible Range Change
-        function handleVisibleRangeChange(logicalRange) {
-            if (!currentCandles.length) return;
-            const meta = STOCKS_DATABASE[currentStockKey];
-
-            // 1. Calculate Index Range with safe boundaries
-            const fromIdx = Math.max(0, Math.floor(logicalRange.from));
-            const toIdx = Math.min(currentCandles.length - 1, Math.ceil(logicalRange.to));
-
-            if (fromIdx > toIdx) return;
-
-            // 2. Find Highest High within the currently visible candles
-            let visibleHigh = -Infinity;
-            for (let i = fromIdx; i <= toIdx; i++) {
-                const candle = currentCandles[i];
-                if (candle && candle.high > visibleHigh) {
-                    visibleHigh = candle.high;
-                }
+        function applyTicker() {
+            const val = tickerInput.value.trim();
+            if (val) {
+                loadChart(val);
+                tickerInput.blur(); // 모바일 가상 키보드 닫기
             }
+        }
 
-            if (visibleHigh === -Infinity || visibleHigh <= 0) return;
+        function setTicker(symbol) {
+            tickerInput.value = symbol.replace('KRX:', '');
+            toggleClearBtn();
+            loadChart(symbol);
+        }
 
-            const latestCandle = currentCandles[currentCandles.length - 1];
-            const currentPrice = latestCandle ? latestCandle.close : visibleHigh;
-            const dropFromVisibleHigh = ((currentPrice - visibleHigh) / visibleHigh) * 100;
+        function clearInput() {
+            tickerInput.value = '';
+            toggleClearBtn();
+            tickerInput.focus();
+        }
 
-            // 3. Update Header & Summary Info Cards
-            const formattedAth = formatPrice(visibleHigh, meta);
-            document.getElementById('headerVisibleAth').textContent = formattedAth;
-            document.getElementById('cardVisibleAth').textContent = formattedAth;
-            document.getElementById('floatAthDisplay').textContent = formattedAth;
-            document.getElementById('cardCurrentPrice').textContent = formatPrice(currentPrice, meta);
-            
-            const cardDropRate = document.getElementById('cardDropRate');
-            cardDropRate.textContent = `${dropFromVisibleHigh.toFixed(2)}%`;
-            cardDropRate.className = dropFromVisibleHigh >= 0 
-                ? "text-xs sm:text-sm font-black font-mono text-emerald-400 mt-1" 
-                : "text-xs sm:text-sm font-black font-mono text-rose-400 mt-1";
-
-            const cardDropStatus = document.getElementById('cardDropStatus');
-            if (dropFromVisibleHigh >= 0) {
-                cardDropStatus.textContent = "최고가 경신중";
-                cardDropStatus.className = "text-[9px] text-emerald-400 mt-0.5 font-mono";
-            } else if (dropFromVisibleHigh <= -30) {
-                cardDropStatus.textContent = "분할 매수 구간 진입";
-                cardDropStatus.className = "text-[9px] text-orange-400 mt-0.5 font-mono font-bold";
+        function toggleClearBtn() {
+            if (tickerInput.value.length > 0) {
+                clearBtn.classList.remove('hidden');
             } else {
-                cardDropStatus.textContent = "조정 진행중";
-                cardDropStatus.className = "text-[9px] text-slate-300 mt-0.5 font-mono";
+                clearBtn.classList.add('hidden');
             }
-
-            // 4. Update the 6 Dynamic Price Lines Smoothly (Zero-Lag applyOptions)
-            peakPriceLine.applyOptions({
-                price: visibleHigh,
-                title: `화면최고 (${formattedAth})`
-            });
-
-            const calculatedLevels = PULLBACK_LEVELS.map((lvl, index) => {
-                const targetPrice = visibleHigh * (1 - lvl.rate);
-                const gapFromCurrent = ((targetPrice - currentPrice) / currentPrice) * 100;
-                const isReached = currentPrice <= targetPrice;
-
-                // Update chart price line
-                if (dynamicPriceLines[index]) {
-                    dynamicPriceLines[index].applyOptions({
-                        price: targetPrice,
-                        title: `${lvl.pctText} (${formatPrice(targetPrice, meta)})`
-                    });
-                }
-
-                return {
-                    ...lvl,
-                    targetPrice,
-                    gapFromCurrent,
-                    isReached
-                };
-            });
-
-            // 5. Update Matrix Table
-            renderTable(calculatedLevels, meta);
         }
 
-        // Render Matrix Table Rows
-        function renderTable(levels, meta) {
-            const tbody = document.getElementById('levelsTableBody');
-            tbody.innerHTML = '';
+        tickerInput.addEventListener('input', toggleClearBtn);
 
-            levels.forEach(lvl => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/40 transition';
-
-                const statusBadge = lvl.isReached 
-                    ? `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold">도달 완료</span>`
-                    : `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[9px] font-bold">대기중</span>`;
-
-                tr.innerHTML = `
-                    <td class="py-2 px-2 flex items-center gap-1.5 text-slate-200">
-                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${lvl.color}"></span>
-                        <span class="font-bold text-xs">${lvl.name}</span>
-                        <span class="text-[9px] px-1 py-0.2 rounded font-mono font-bold ${lvl.bgClass}">${lvl.pctText}</span>
-                    </td>
-                    <td class="py-2 px-2 text-right font-black text-xs" style="color: ${lvl.color}">
-                        ${formatPrice(lvl.targetPrice, meta)}
-                    </td>
-                    <td class="py-2 px-2 text-right text-xs font-bold ${lvl.gapFromCurrent <= 0 ? 'text-emerald-400' : 'text-slate-300'}">
-                        ${lvl.gapFromCurrent <= 0 ? '도달' : lvl.gapFromCurrent.toFixed(1) + '%'}
-                    </td>
-                    <td class="py-2 px-2 text-center">
-                        ${statusBadge}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Load Stock
-        function loadStock(ticker) {
-            currentStockKey = ticker;
-            const meta = STOCKS_DATABASE[ticker];
-
-            // 1. Generate Stock Data
-            currentCandles = generateStockData(ticker);
-            candleSeries.setData(currentCandles);
-
-            // 2. Update UI Metadata
-            document.getElementById('currencyBadge').textContent = `${meta.currency} (${meta.locale.split('-')[1] || 'USD'})`;
-            document.getElementById('chartTitle').textContent = `${ticker} • 1D`;
-
-            // 3. Set Initial View (Focus on recent ~120 bars)
-            const total = currentCandles.length;
-            chart.timeScale().setVisibleLogicalRange({
-                from: Math.max(0, total - 120),
-                to: total - 1
-            });
-        }
-
-        // Event Listeners
-        document.getElementById('stockSelector').addEventListener('change', (e) => {
-            loadStock(e.target.value);
-        });
-
-        document.getElementById('resetRangeBtn').addEventListener('click', () => {
-            if (chart) chart.timeScale().fitContent();
-        });
-
-        document.getElementById('recent3MBtn').addEventListener('click', () => {
-            if (chart && currentCandles.length) {
-                const total = currentCandles.length;
-                chart.timeScale().setVisibleLogicalRange({
-                    from: Math.max(0, total - 65),
-                    to: total - 1
-                });
-            }
-        });
-
-        // Initialize App
+        // Initial Load
         window.addEventListener('DOMContentLoaded', () => {
-            initChart();
-            loadStock('MU'); // Default to Micron
+            loadChart('MU');
+            toggleClearBtn();
         });
     </script>
 </body>
