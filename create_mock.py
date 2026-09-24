@@ -1,0 +1,100 @@
+﻿import json
+
+mock_tests = [
+    {
+        "part": 1,
+        "partTitle": "Part 1. Read a text aloud (문장 읽기)",
+        "questionTitle": "Q1-Q2. 지문 소리 내어 읽기 (Read the text aloud)",
+        "direction": "지문을 보고 45초 동안 준비한 후, 45초 동안 소리 내어 자연스럽게 읽으세요.",
+        "questionText": "Welcome to Central City Library. Please remember that all mobile phones must be set to silent mode. If you need to return books, use the automated return desk on the first floor. For assistance with computer skills or research, visit the information counter on the second floor. Thank you for your cooperation.",
+        "koreanQuestion": "[한국어 번역]\n센트럴 시티 도서관에 오신 것을 환영합니다. 모든 휴대폰은 무음 모드로 설정해야 함을 유의해 주시기 바랍니다. 도서를 반납하셔야 한다면 1층의 자동 반납대를 이용해 주십시오. 컴퓨터 기술이나 연구에 관한 도움이 필요하시면 2층의 안내 데스크를 방문해 주십시오. 협조해 주셔서 감사합니다.",
+        "answer": "Welcome to Central City Library. Please remember that all mobile phones must be set to silent mode. If you need to return books, use the automated return desk on the first floor. For assistance with computer skills or research, visit the information counter on the second floor. Thank you for your cooperation.",
+        "koreanAnswer": "[고득점 읽기 가이드]\n1. 첫 문장 환영 인사: Welcome to↗ Central City Library.↘\n2. 요청문: Please remember that↘ all mobile phones must be set to silent mode.↘\n3. 조건절 끊어읽기: If you need to return books,/ use the automated return desk/ on the first floor.↘\n4. 나열 구조 및 연음 훈련: 84번(It's cheaper and faster [잍스 츼퍼런 패아스터]), 85번(It's very convenient and useful [잍스 붸리 컨븨년-너뉴-스ㅍ훠오])의 자연스러운 연음 감각을 살려 발음합니다.",
+        "tips": [
+            "연음 및 발음 꿀팁: It's cheaper and faster [84번: 잍스 츼퍼런 패아스터], It's very convenient and useful [85번: 잍스 붸리 컨븨년-너뉴-스ㅍ훠오]",
+            "나열 구조 (A, B, and C): A↗, B↗, and C↘ 억양을 살려 읽습니다.",
+            "고유명사 및 서수(First, Second) 강세 명확히."
+        ],
+        "usedSentences": [84, 85, 139]
+    },
+    {
+        "part": 2,
+        "partTitle": "Part 2. Describe a picture (사진 묘사)",
+        "questionTitle": "Q3. 공원 사진 묘사하기 (Describe the Park Scene)",
+        "direction": "사진을 45초 동안 분석한 후, 30초 동안 사진의 모든 주요 요소를 영어로 묘사하세요.",
+        "scenario": "[사진 상황]: 화창한 도심 공원. 중앙에 분수가 있고, 앞쪽 테이블에 두 여성이 앉아 커피를 마시며 대화 중이며, 뒤쪽에 정장 차림의 남성들이 서 있고, 좌측 보도에서 개를 산책시키는 인물이 보임.",
+        "koreanQuestion": "[질문 의도]\n화면에 나타난 공원 사진을 보고 장소, 주요 인물, 위치별 세부 동작, 주변 배경, 전반적인 느낌을 순서대로 묘사하세요.",
+        "answer": "This is a picture taken at a park. The first thing I can see in this picture is two women sitting at a table. In the foreground of the picture, I can see a fountain. She is holding a cup, and they are having a conversation. Next to her, there is another woman. Behind her, I can see two men standing. Most of them are wearing formal clothes, but some of them are wearing casual clothes. On the left side of the picture, there is a sidewalk, and a man is walking a dog. Overall, the scene looks peaceful and pleasant.",
+        "koreanAnswer": "[한국어 모범 답안 풀이]\n1. 장소 도입: 이 사진은 공원에서 찍힌 사진입니다. (1번)\n2. 주요 인물: 이 사진에서 가장 먼저 보이는 것은 두 여성입니다. (2번) 테이블에 앉아 있습니다. (21번)\n3. 위치 및 세부 동작: 사진의 전경에는 분수가 보입니다. (3번) 그녀는 컵을 들고 있고 (16번), 그들은 대화를 나누고 있습니다. (18번)\n4. 주변 인물/위치: 그녀 옆에는 다른 여성이 있고 (8번), 그녀 뒤에는 서 있는 두 남자가 보입니다. (9번)\n5. 복장: 그들 대부분은 정장을 입고 있지만 (10번), 일부는 편안한 평상복을 입고 있습니다. (11번)\n6. 배경 및 주변: 사진의 왼쪽에는 보도가 있고 (6번), 개를 산책시키는 사람도 보입니다. (39번)\n7. 마무리: 전반적으로 평화롭고 쾌적해 보입니다.",
+        "tips": [
+            "Part 2 고득점 공식: [장소 소개 (1번)] → [중심 인물 묘사 (2, 21, 16, 18번)] → [주변/배경 묘사 (3, 6, 8, 9, 39번)] → [복장 및 느낌 (10, 11번)]",
+            "동작 표현은 반드시 현재진행형(be + -ing)을 사용하세요."
+        ],
+        "usedSentences": [1, 2, 3, 6, 8, 9, 10, 11, 16, 18, 21, 39]
+    },
+    {
+        "part": 2,
+        "partTitle": "Part 2. Describe a picture (사진 묘사)",
+        "questionTitle": "Q4. 카페 및 상점 사진 묘사하기 (Describe the Cafe / Store Scene)",
+        "direction": "실내 상점/카페 사진을 보고 30초 동안 인물과 상황을 묘사하세요.",
+        "scenario": "[사진 상황]: 아늑한 카페 내부. 점원이 손님에게 음식을 서빙하고 있고, 카운터(계산대) 앞에서는 손님이 줄을 서서 신용카드를 건네며 결제하고 있으며, 다른 손님은 가방을 확인하거나 메뉴를 보고 있음.",
+        "koreanQuestion": "[질문 의도]\n카페/상점 내부 사진을 보고 점원의 행동과 손님들의 다양한 행동을 논리적으로 묘사하세요.",
+        "answer": "This is a picture taken at a cafe. In the middle of the picture, she is serving food to customers. On the right side of the picture, they are standing at the cashier and waiting in line. A man is handing over a credit card to pay, and next to him, she is looking into a bag. In the background, another customer is looking at a menu. Overall, everyone looks busy enjoying their time.",
+        "koreanAnswer": "[한국어 모범 답안 풀이]\n1. 장소: 카페에서 찍힌 사진입니다. (1번 응용)\n2. 중심 인물: 사진 중앙에서 그녀는 손님들에게 음식을 서빙하고 있습니다. (4, 15번)\n3. 위치 및 결제: 사진 오른쪽에서 사람들은 계산대에 서서 줄을 서서 기다리고 있습니다. (7, 17, 26번)\n4. 세부 행동: 한 남자는 신용카드를 건네고 있고 (23번), 그 옆의 여성은 가방 안을 들여다보고 있습니다. (8, 19번)\n5. 배경: 뒤쪽의 다른 손님은 메뉴판을 보고 있습니다. (5, 12번)\n6. 마무리: 전반적으로 다들 즐거운 시간을 보내며 바빠 보입니다.",
+        "tips": [
+            "상점/카페 필수 표현: serving food (15), at the cashier (17), handing over a credit card (23), waiting in line (26), looking at a menu (12)"
+        ],
+        "usedSentences": [4, 7, 8, 12, 15, 17, 19, 23, 26]
+    },
+    {
+        "part": 3,
+        "partTitle": "Part 3. Respond to questions (질문 응답)",
+        "questionTitle": "Q5-Q7. 온라인 쇼핑 및 스마트폰 활용 (Online Shopping & Smartphone)",
+        "direction": "일상 대화 인터뷰 상황입니다. 질문을 듣고 준비 시간 없이 즉시(15초/15초/30초) 답변하세요.",
+        "scenario": "[주제: Online Shopping vs In-store Shopping]",
+        "koreanQuestion": "[Q5 - 15초] 얼마나 자주 온라인으로 쇼핑을 하며, 주로 무엇을 사나요?\n[Q6 - 15초] 매장에 직접 가서 쇼핑하기보다 온라인 쇼핑을 선호하는 주된 이유는 무엇인가요?\n[Q7 - 30초] 친구에게 선물을 사줄 때, 오프라인 매장 방문보다 스마트폰 앱으로 주문하는 것을 선호하나요? 그 이유는 무엇인가요?",
+        "answer": "[Q5 Answer (15s)]:\nI frequently use it. It's part of my routine, and I usually buy clothes and daily necessities once a week.\n\n[Q6 Answer (15s)]:\nIt's cheaper and faster, so I can save money and save time. The price is reasonable, and I can get information anytime, anywhere on my smartphone.\n\n[Q7 Answer (30s)]:\nYes, I definitely prefer ordering gifts on my smartphone. First of all, I'm a worker, so I'm busy with my work and I don't have much time. I don't want to waste time going out and waiting in line. Secondly, it's very convenient and useful. I can easily find popular items, and they provide a good environment and reliable reviews, so I can trust the product. Most of all, it's cheaper, so I can save money on my tight budget.",
+        "koreanAnswer": "[한국어 모범 답안 풀이]\n[Q5 답변]: 저는 그것을 자주 사용합니다 (71번). 제 일과의 일부이며 (79번), 일주일에 한 번씩 옷과 생필품을 주로 구입합니다.\n\n[Q6 답변]: 더 저렴하고 더 빨라서 돈과 시간을 모두 절약할 수 있습니다 (52, 54, 84번). 가격도 합리적이고 (53번), 스마트폰으로 언제 어디서나 정보를 얻을 수 있기 때문입니다 (57번).\n\n[Q7 답변]: 네, 저는 스마트폰으로 선물을 주문하는 것을 훨씬 선호합니다.\n첫째, 저는 직장인이라 업무로 바쁘고 시간이 별로 없습니다 (66, 67번). 외출하느라 시간을 낭비하거나 줄을 서서 기다리고 싶지 않습니다 (93, 95번).\n둘째, 매우 편리하고 유용합니다 (85번). 인기 있는 상품(76번)을 쉽게 찾을 수 있고, 신뢰할 수 있어서 제품을 믿을 수 있습니다 (75번).\n무엇보다도 더 저렴해서 빠듯한 예산에서 돈을 절약할 수 있습니다 (52, 62번).",
+        "tips": [
+            "Part 3 만능 키워드 콤보: 바쁜 직장인(66, 67번) + 시간/비용 절약(52, 54, 84번) + 스마트폰 편리성(57, 85번) + 스트레스 해소(50, 88번)",
+            "30초 질문(Q7)은 [의견 제시] + [이유 1 (First of all...)] + [이유 2 (Secondly...)] + [마무리 (That's why...)] 구조로 말하면 만점입니다."
+        ],
+        "usedSentences": [52, 53, 54, 57, 62, 66, 67, 71, 75, 76, 79, 84, 85, 93, 95]
+    },
+    {
+        "part": 4,
+        "partTitle": "Part 4. Respond to questions using information (제공된 정보 활용)",
+        "questionTitle": "Q8-Q10. 컨퍼런스 일정표 보고 문의 전화 응대하기 (Conference Schedule Inquiry)",
+        "direction": "화면에 주어진 컨퍼런스 일정표를 45초 동안 읽고, 고객의 전화 질문 3개에 각각 15초/15초/30초 동안 응답하세요.",
+        "scenario": "[주어진 일정표 요약]:\n- 행사명: 2026 Global Marketing Conference\n- 일시/장소: June 20th / Hilton Hotel\n- 09:00 AM: Registration and Coffee (Lobby)\n- 10:00 AM: Keynote Speech\n- 12:00 PM: Lunch (Provided)\n- 01:00 PM: Workshop on Social Media Marketing (by Ray Kingston)\n- 02:30 PM: Discussion on Appealing to Sports Fans through Marketing (by Kevin Delmont)\n- 05:00 PM: Closing Remarks & Seminar End",
+        "koreanQuestion": "[Q8 - 15초] 컨퍼런스가 언제 어디서 열리며, 몇 시에 시작하나요?\n[Q9 - 15초] 제가 듣기로는 등록(Registration)이 오전 10시에 시작한다고 들었는데 맞나요?\n[Q10 - 30초] 마케팅 관련 세션 일정에 대해 모두 자세히 알려주시겠어요?",
+        "answer": "[Q8 Answer (15s)]:\nThe conference will be held on June 20th at the Hilton Hotel, and it will start at 9 am.\n\n[Q9 Answer (15s)]:\nNo, I'm afraid that you have the wrong information. Actually, the registration and coffee session will start at 9 am in the lobby.\n\n[Q10 Answer (30s)]:\nSure! There are two sessions scheduled for marketing.\nFirst, at 1 pm, there is a workshop on social media marketing by Ray Kingston.\nNext, at 2:30 pm, there is a discussion on appealing to sports fans through marketing by Kevin Delmont.\nBoth sessions will be very helpful!",
+        "koreanAnswer": "[한국어 모범 답안 풀이]\n[Q8 답변]: 컨퍼런스는 6월 20일 힐튼 호텔에서 개최되며 (98번), 오전 9시에 시작할 예정입니다 (99번).\n\n[Q9 답변 (오정보 정정 만능)]: 아니요, 유감스럽게도 잘못된 정보를 알고 계십니다 (101번). 사실, 등록 및 모닝커피 세션은 로비에서 오전 9시에 시작합니다 (102번).\n\n[Q10 답변 (세션 복수 안내)]: 물론입니다! 마케팅 관련해서는 두 개의 세션이 있습니다 (103번).\n첫 번째로, 오후 1시에 Ray Kingston이 진행하는 소셜 미디어 마케팅 워크숍이 있습니다 (104번).\n다음으로, 오후 2시 30분에 Kevin Delmont가 진행하는 마케팅을 통한 스포츠 팬 공략 토론이 있습니다 (105번).\n두 세션 모두 매우 유익할 것입니다 (86번).",
+        "tips": [
+            "Part 4 Q8 공식: [The conference will be held on 날짜 at 장소 (98번)] + [It will start at 시간 (99번)]",
+            "Part 4 Q9 공식 (오정보 반박): [No, I'm afraid that you have the wrong information. (101번)] + [Actually, 진짜 정보 (102, 118번)]",
+            "Part 4 Q10 공식 (2개 이상 공통 항목 묶어 말하기): [There are two sessions (103번)] → [First, at 시간, 내용 by 강사 (104번)] → [Next/Second, at 시간, 내용 by 강사 (105번)]"
+        ],
+        "usedSentences": [86, 98, 99, 100, 101, 102, 103, 104, 105, 110]
+    },
+    {
+        "part": 5,
+        "partTitle": "Part 5. Express an opinion (의견 제시하기)",
+        "questionTitle": "Q11. 재택근무 vs 사무실 출근 의견 제시 (Remote Work vs Office Work)",
+        "direction": "주어진 논제에 대해 자신의 입장을 정하고, 45초 동안 준비한 후 60초 동안 논리적인 이유와 구체적인 근거를 들어 말하세요.",
+        "questionText": "Do you agree or disagree with the following statement? 'Working from home is better for employee productivity than working in an office.' Give specific reasons and examples to support your opinion.",
+        "koreanQuestion": "[한국어 문제 해석]\n다음 주장에 동의하십니까, 동의하지 않습니까?\n'재택근무를 하는 것이 사무실에서 일하는 것보다 직원의 생산성에 더 좋다.'\n구체적인 이유와 예시를 들어 자신의 의견을 뒷받침하세요.",
+        "answer": "I agree that working from home is better for employee productivity.\n\nFirst of all, employees can focus better. When working from home, they will not be distracted by others, so they can work more efficiently and productively without interruptions. Also, they can save time because they don't have to waste time commuting.\n\nSecondly, employees can set their own schedule and have more freedom. It can make a better work environment, and employees can be more satisfied with their jobs. When workers are less stressed out, they can get good results at work.\n\nFor these reasons, I strongly believe that working from home is much better for productivity.",
+        "koreanAnswer": "[한국어 모범 답안 풀이]\n[서론]: 저는 재택근무가 직원의 생산성에 더 좋다는 것에 동의합니다.\n\n[본론 1 - 집중력 및 방해 차단]:\n첫째로, 직원들은 더 잘 집중할 수 있습니다 (155번). 재택근무를 할 때, 다른 사람들에게 방해받지 않으므로 (156번) 방해 없이 더욱 효율적이고 생산적으로 일할 수 있습니다 (179번). 또한 출퇴근하느라 시간을 낭비할 필요가 없어서 시간을 절약할 수 있습니다 (95번).\n\n[본론 2 - 자율성 및 직무 만족도]:\n둘째로, 직원들은 자신만의 일정을 계획할 수 있고 더 많은 자유를 누릴 수 있습니다 (157, 158번). 이는 더 나은 업무 환경을 만들 수 있고 (181번), 직원들이 자신의 직무에 대해 더 높은 만족감을 느끼게 합니다 (180번). 직원들이 스트레스를 덜 받을 때 직장에서 훌륭한 성과를 낼 수 있습니다 (51, 146번 반대).\n\n[결론]:\n이러한 이유들로 인해, 저는 재택근무가 생산성에 훨씬 더 좋다고 강력히 믿습니다.",
+        "tips": [
+            "Part 5 60초 완벽 템플릿: [서론 5초: I agree that...] → [본론 1 (25초): First of all, 155번 + 156번 + 179번 + 95번] → [본론 2 (25초): Secondly, 157번 + 158번 + 180번 + 181번] → [결론 5초: For these reasons, I believe that...]",
+            "반대 입장일 경우: 팀워크와 원활한 소통 (168, 169, 170번), 대면 피드백 (166, 167번), 프로페셔널한 이미지 (182번) 활용!"
+        ],
+        "usedSentences": [51, 95, 146, 155, 156, 157, 158, 179, 180, 181]
+    }
+]
+
+with open('mock_tests.json', 'w', encoding='utf-8') as f:
+    json.dump(mock_tests, f, ensure_ascii=False, indent=2)
+
+print('mock_tests.json created successfully')

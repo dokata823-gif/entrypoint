@@ -1,0 +1,815 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>토익스피킹 만능 187문장 & 전 파트 실전 문제 풀이 마스터</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0d1117;
+      --bg-card: #161b22;
+      --bg-subcard: #21262d;
+      --border-color: #30363d;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-yellow: #d29922;
+      --accent-purple: #bc8cff;
+      --accent-red: #f85149;
+      --text-main: #c9d1d9;
+      --text-bright: #f0f6fc;
+      --text-muted: #8b949e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1f242c 0%, #111419 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .badge {
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent-blue);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+    }
+
+    .badge.green {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--accent-green);
+      border-color: rgba(63, 185, 80, 0.3);
+    }
+
+    .badge.purple {
+      background: rgba(188, 140, 255, 0.15);
+      color: var(--accent-purple);
+      border-color: rgba(188, 140, 255, 0.3);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* Tab Nav */
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: var(--bg-subcard);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-blue);
+      color: #ffffff;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .tab-section {
+      display: none;
+    }
+
+    .tab-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Exam Mode Cards */
+    .mock-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .mock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .mock-part-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-yellow);
+    }
+
+    .mock-q-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .mock-box {
+      background: var(--bg-subcard);
+      border-left: 4px solid var(--accent-blue);
+      padding: 16px;
+      border-radius: 6px;
+      margin: 16px 0;
+    }
+
+    .mock-box.korean {
+      border-left-color: var(--accent-green);
+    }
+
+    .box-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .english-text {
+      font-size: 1.08rem;
+      color: var(--text-bright);
+      font-weight: 500;
+      white-space: pre-line;
+      line-height: 1.7;
+    }
+
+    .korean-text {
+      font-size: 0.98rem;
+      color: #94d2bd;
+      white-space: pre-line;
+      line-height: 1.7;
+    }
+
+    .tips-list {
+      list-style: none;
+      margin-top: 10px;
+    }
+
+    .tips-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+      font-size: 0.92rem;
+      color: var(--text-main);
+    }
+
+    .tips-list li::before {
+      content: "💡";
+      position: absolute;
+      left: 0;
+      font-size: 0.85rem;
+    }
+
+    .used-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+      align-items: center;
+    }
+
+    .tag-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .used-pill {
+      background: rgba(188, 140, 255, 0.18);
+      color: var(--accent-purple);
+      border: 1px solid rgba(188, 140, 255, 0.4);
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .used-pill:hover {
+      background: rgba(188, 140, 255, 0.35);
+    }
+
+    /* TTS & Action Buttons */
+    .btn-speak {
+      background: #238636;
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .btn-speak:hover {
+      background: #2ea043;
+    }
+
+    /* 187 Sentences Search & List */
+    .search-bar-wrap {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-bright);
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+    }
+
+    .filter-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-bright);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .sentence-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 16px;
+    }
+
+    .sentence-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sentence-item:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-blue);
+    }
+
+    .sentence-num {
+      display: inline-block;
+      background: rgba(88, 166, 255, 0.2);
+      color: var(--accent-blue);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .sentence-tag {
+      float: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .sentence-en {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .sentence-ko {
+      font-size: 0.92rem;
+      color: #94d2bd;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .sentence-pron {
+      font-size: 0.82rem;
+      color: var(--accent-yellow);
+      background: rgba(210, 153, 34, 0.12);
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .sentence-btn-row {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      color: var(--text-bright);
+      border-color: var(--accent-blue);
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    /* Flashcard / Quiz Mode */
+    .quiz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .quiz-badge {
+      display: inline-block;
+      background: rgba(210, 153, 34, 0.2);
+      color: var(--accent-yellow);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .quiz-ko-prompt {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .quiz-answer-box {
+      background: var(--bg-subcard);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .quiz-answer-en {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 6px;
+    }
+
+    .quiz-nav-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn-quiz {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-quiz.primary {
+      background: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    .btn-quiz.secondary {
+      background: var(--bg-subcard);
+      color: var(--text-bright);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-quiz:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 1.4rem; }
+      .sentence-grid { grid-template-columns: 1fr; }
+      .mock-card { padding: 16px; }
+      .english-text { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="badge-wrap">
+        <span class="badge">TOEIC SPEAKING ALL PARTS</span>
+        <span class="badge green">187개 만능 템플릿 문장</span>
+        <span class="badge purple">실전 문제 & 완벽 풀이</span>
+      </div>
+      <h1>토익스피킹 만능 187문장 실전 마스터</h1>
+      <p class="subtitle">모든 파트별 기출 문제, 만능 187문장 조합 모범 답안, 상세 풀이 및 한국어 번역 제공</p>
+
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-exam')">📝 실전 모의고사 & 풀이 (Part 1~5)</button>
+        <button class="tab-btn" onclick="switchTab('tab-sentences')">📚 187개 만능 문장 사전</button>
+        <button class="tab-btn" onclick="switchTab('tab-quiz')">⚡ 1초 영작 플래시카드</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- TAB 1: 실전 모의고사 & 풀이 -->
+    <section id="tab-exam" class="tab-section active">
+      <div id="mock-container"></div>
+    </section>
+
+    <!-- TAB 2: 187개 만능 문장 사전 -->
+    <section id="tab-sentences" class="tab-section">
+      <div class="search-bar-wrap">
+        <input type="text" id="sentence-search" class="search-input" placeholder="🔍 영어 문장, 한글 뜻, 번호로 검색 (예: stress, 분수, 84, 커피)..." oninput="filterSentences()">
+        <select id="part-filter" class="filter-select" onchange="filterSentences()">
+          <option value="all">전체 파트 (187개 문장)</option>
+          <option value="Part 2">Part 2 사진 묘사 (1~49번)</option>
+          <option value="Part 3">Part 3 & 5 만능 이유 (50~97번)</option>
+          <option value="Part 4">Part 4 일정표/정보 (98~139번)</option>
+          <option value="Part 5">Part 5 비즈니스/의견 (140~187번)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 14px; font-size: 0.9rem; color: var(--text-muted);" id="sentence-count">
+        총 187개의 만능 문장 표시 중
+      </div>
+
+      <div class="sentence-grid" id="sentence-grid-container"></div>
+    </section>
+
+    <!-- TAB 3: 플래시카드 퀴즈 -->
+    <section id="tab-quiz" class="tab-section">
+      <div class="quiz-card">
+        <div class="quiz-badge" id="quiz-index-badge">Question 1 / 187</div>
+        <div class="quiz-ko-prompt" id="quiz-ko-text">한국어 뜻이 표시됩니다.</div>
+        
+        <div class="quiz-answer-box" id="quiz-answer-box">
+          <div style="color: var(--text-muted); font-size: 0.95rem;" id="quiz-placeholder">아래 [정답 확인] 버튼을 누르면 영어 문장이 나타납니다.</div>
+          <div class="quiz-answer-en" id="quiz-en-text" style="display: none;"></div>
+          <div class="sentence-pron" id="quiz-pron-text" style="display: none;"></div>
+        </div>
+
+        <div class="quiz-nav-row">
+          <button class="btn-quiz secondary" onclick="prevQuiz()">◀ 이전 문장</button>
+          <button class="btn-quiz primary" id="btn-reveal" onclick="toggleQuizAnswer()">💡 정답 확인</button>
+          <button class="btn-quiz secondary" onclick="speakText(currentQuizEn())">🔊 발음 듣기</button>
+          <button class="btn-quiz primary" onclick="nextQuiz()">다음 문장 ▶</button>
+          <button class="btn-quiz secondary" onclick="randomQuiz()">🎲 랜덤 출제</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const sentences = __SENTENCES_DATA__;
+    const mockTests = __MOCK_DATA__;
+
+    // 1. Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      const idx = tabId === 'tab-exam' ? 0 : (tabId === 'tab-sentences' ? 1 : 2);
+      document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+
+      if (tabId === 'tab-quiz') {
+        renderQuiz();
+      }
+    }
+
+    // 2. TTS Web Speech API
+    function speakText(text) {
+      if (!text) return;
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.92;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert('이 브라우저는 음성 합성을 지원하지 않습니다.');
+      }
+    }
+
+    // 3. Render Mock Tests
+    function renderMockTests() {
+      const container = document.getElementById('mock-container');
+      container.innerHTML = mockTests.map((t, idx) => {
+        const usedPills = t.usedSentences.map(num => {
+          const item = sentences.find(s => s.id === num);
+          const enSnippet = item ? item.en : '';
+          return `<span class="used-pill" onclick="searchForNum(${num})" title="${enSnippet}">#${num}번 문장 활용</span>`;
+        }).join(' ');
+
+        return `
+          <div class="mock-card">
+            <div class="mock-header">
+              <div>
+                <div class="mock-part-title">${t.partTitle}</div>
+                <div class="mock-q-title">${t.questionTitle}</div>
+              </div>
+              <button class="btn-speak" onclick="speakText('${t.answer.replace(/'/g, "\\\\'").replace(/\\n/g, ' ')}')">
+                🔊 모범 답변 전체 듣기
+              </button>
+            </div>
+
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
+              <strong>📋 시험 지침 (Directions):</strong> ${t.direction}
+            </div>
+
+            ${t.questionText ? `
+              <div class="mock-box">
+                <div class="box-label">📄 영어 문제 지문 (Question Prompt)</div>
+                <div class="english-text">${t.questionText}</div>
+              </div>
+            ` : ''}
+
+            ${t.scenario ? `
+              <div class="mock-box" style="border-left-color: var(--accent-yellow);">
+                <div class="box-label">🖼️ 사진/상황 시나리오 (Scenario)</div>
+                <div style="color: var(--text-bright); font-size: 0.95rem;">${t.scenario}</div>
+              </div>
+            ` : ''}
+
+            <div class="mock-box korean">
+              <div class="box-label">🇰🇷 문제 한국어 번역 & 질문 의도</div>
+              <div class="korean-text">${t.koreanQuestion}</div>
+            </div>
+
+            <div class="mock-box">
+              <div class="box-label">🎯 187개 만능 문장 조합 고득점 모범 답안 (Model Answer)</div>
+              <div class="english-text">${t.answer}</div>
+            </div>
+
+            <div class="mock-box korean">
+              <div class="box-label">💡 문장 번호 매핑 및 한글 상세 해설 (Explanation)</div>
+              <div class="korean-text">${t.koreanAnswer}</div>
+            </div>
+
+            <div style="margin-top: 14px;">
+              <strong style="color: var(--accent-yellow); font-size: 0.9rem;">✨ 실전 고득점 공략 팁:</strong>
+              <ul class="tips-list">
+                ${t.tips.map(tip => `<li>${tip}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="used-tags">
+              <span class="tag-label">연계된 만능 문장:</span>
+              ${usedPills}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function searchForNum(num) {
+      switchTab('tab-sentences');
+      const input = document.getElementById('sentence-search');
+      input.value = num;
+      filterSentences();
+    }
+
+    // 4. Render Sentences
+    function renderSentences(list) {
+      const container = document.getElementById('sentence-grid-container');
+      const countEl = document.getElementById('sentence-count');
+      countEl.innerText = `총 ${list.length}개의 만능 문장 표시 중`;
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">검색 결과가 없습니다.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <div class="sentence-item">
+          <div>
+            <div>
+              <span class="sentence-num">No. ${item.id}</span>
+              <span class="sentence-tag">${item.tag}</span>
+            </div>
+            <div class="sentence-en">${item.en}</div>
+            <div class="sentence-ko">${item.ko}</div>
+            ${item.pron ? `<div class="sentence-pron">🗣️ 발음 가이드: ${item.pron}</div>` : ''}
+          </div>
+          <div class="sentence-btn-row">
+            <button class="btn-icon" onclick="speakText('${item.en.replace(/'/g, "\\\\')}')">
+              🔊 발음 듣기
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterSentences() {
+      const query = document.getElementById('sentence-search').value.trim().toLowerCase();
+      const partFilter = document.getElementById('part-filter').value;
+
+      const filtered = sentences.filter(item => {
+        const matchesQuery = !query || 
+          item.id.toString() === query ||
+          item.en.toLowerCase().includes(query) ||
+          item.ko.toLowerCase().includes(query) ||
+          item.tag.toLowerCase().includes(query);
+
+        const matchesPart = partFilter === 'all' || item.tag.includes(partFilter);
+        return matchesQuery && matchesPart;
+      });
+
+      renderSentences(filtered);
+    }
+
+    // 5. Quiz Logic
+    let currentQuizIdx = 0;
+    let isAnswerRevealed = false;
+
+    function renderQuiz() {
+      const item = sentences[currentQuizIdx];
+      document.getElementById('quiz-index-badge').innerText = `Question ${item.id} / ${sentences.length} (${item.tag})`;
+      document.getElementById('quiz-ko-text').innerText = item.ko;
+
+      const placeholder = document.getElementById('quiz-placeholder');
+      const enEl = document.getElementById('quiz-en-text');
+      const pronEl = document.getElementById('quiz-pron-text');
+      const btnReveal = document.getElementById('btn-reveal');
+
+      if (isAnswerRevealed) {
+        placeholder.style.display = 'none';
+        enEl.style.display = 'block';
+        enEl.innerText = item.en;
+
+        if (item.pron) {
+          pronEl.style.display = 'inline-block';
+          pronEl.innerText = `🗣️ 발음: ${item.pron}`;
+        } else {
+          pronEl.style.display = 'none';
+        }
+        btnReveal.innerText = '🔒 정답 숨기기';
+      } else {
+        placeholder.style.display = 'block';
+        enEl.style.display = 'none';
+        pronEl.style.display = 'none';
+        btnReveal.innerText = '💡 정답 확인';
+      }
+    }
+
+    function toggleQuizAnswer() {
+      isAnswerRevealed = !isAnswerRevealed;
+      renderQuiz();
+    }
+
+    function nextQuiz() {
+      currentQuizIdx = (currentQuizIdx + 1) % sentences.length;
+      isAnswerRevealed = false;
+      renderQuiz();
+    }
+
+    function prevQuiz() {
+      currentQuizIdx = (currentQuizIdx - 1 + sentences.length) % sentences.length;
+      isAnswerRevealed = false;
+      renderQuiz();
+    }
+
+    function randomQuiz() {
+      currentQuizIdx = Math.floor(Math.random() * sentences.length);
+      isAnswerRevealed = false;
+      renderQuiz();
+    }
+
+    function currentQuizEn() {
+      return sentences[currentQuizIdx].en;
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      renderMockTests();
+      renderSentences(sentences);
+    });
+  </script>
+</body>
+</html>
