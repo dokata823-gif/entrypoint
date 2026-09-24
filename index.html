@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -80,6 +80,12 @@
       border-color: rgba(63, 185, 80, 0.3);
     }
 
+    .badge.purple {
+      background: rgba(210, 168, 255, 0.15);
+      color: var(--accent-purple);
+      border-color: rgba(210, 168, 255, 0.3);
+    }
+
     h1 {
       font-size: 1.25rem;
       font-weight: 800;
@@ -94,12 +100,41 @@
       line-height: 1.4;
     }
 
+    /* Global Toggle Button in Header */
+    .global-btn-wrap {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-global-toggle {
+      background: rgba(88, 166, 255, 0.18);
+      color: var(--accent-blue);
+      border: 1px solid rgba(88, 166, 255, 0.4);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-global-toggle:hover, .btn-global-toggle:active {
+      background: var(--accent-blue);
+      color: #000;
+    }
+
     /* Mobile Quick Navigation */
     .nav-bar {
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding: 10px 0 2px 0;
+      padding: 0;
       scrollbar-width: none;
     }
 
@@ -161,7 +196,7 @@
     /* Part Sections */
     .part-section {
       margin-bottom: 36px;
-      scroll-margin-top: 130px;
+      scroll-margin-top: 150px;
     }
 
     .part-header {
@@ -272,14 +307,49 @@
       margin-bottom: 12px;
     }
 
+    .answer-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
     .answer-label {
       font-size: 0.76rem;
       font-weight: 800;
       color: var(--accent-green);
-      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 4px;
+    }
+
+    /* Toggle Button */
+    .btn-toggle-en {
+      background: #1e3a32;
+      color: #a7f3d0;
+      border: 1px solid #2d6a4f;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-en:hover, .btn-toggle-en:active {
+      background: #2d6a4f;
+      color: #ffffff;
+    }
+
+    .btn-toggle-en.active {
+      background: var(--accent-blue);
+      color: #000000;
+      border-color: var(--accent-blue);
     }
 
     .answer-content {
@@ -299,6 +369,44 @@
       padding: 1px 5px;
       border-radius: 4px;
       margin-right: 4px;
+    }
+
+    /* English Original Text Box (Toggled) */
+    .en-box {
+      display: none;
+      background: #141c2b;
+      border: 1px dashed var(--accent-blue);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 10px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .en-box.show {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .en-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--accent-blue);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .en-text {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      line-height: 1.65;
+      font-weight: 500;
+      white-space: pre-line;
     }
 
     /* Sentence Numbers Footnote / Mapping */
@@ -428,19 +536,23 @@
       <div class="badge-wrap">
         <span class="badge">한글 눈독(目讀) 학습</span>
         <span class="badge green">187개 만능문장 공식</span>
+        <span class="badge purple">영어 원문 토글 기능</span>
       </div>
       <span style="font-size: 0.75rem; color: var(--text-muted);">📱 모바일 원페이지</span>
     </div>
     <h1>토익스피킹 한글 문제 & 만능 답안지</h1>
     <p class="subtitle">질문 유형과 정해진 한글 답안 흐름을 눈으로 보며 통째로 익히는 암기노트</p>
 
-    <!-- Navigation -->
-    <div class="nav-bar">
-      <a href="#p2" class="nav-btn">🖼️ Part 2 사진</a>
-      <a href="#p3" class="nav-btn">💬 Part 3 질문</a>
-      <a href="#p4" class="nav-btn">📊 Part 4 정보</a>
-      <a href="#p5" class="nav-btn">💡 Part 5 의견</a>
-      <a href="#sent-all" class="nav-btn">📚 187 문장사전</a>
+    <!-- Global English Toggle & Nav -->
+    <div class="global-btn-wrap">
+      <div class="nav-bar">
+        <a href="#p2" class="nav-btn">🖼️ Part 2</a>
+        <a href="#p3" class="nav-btn">💬 Part 3</a>
+        <a href="#p4" class="nav-btn">📊 Part 4</a>
+        <a href="#p5" class="nav-btn">💡 Part 5</a>
+        <a href="#sent-all" class="nav-btn">📚 187 문장</a>
+      </div>
+      <button class="btn-global-toggle" id="btn-toggle-all" onclick="toggleAllEn()">🇺🇸 전체 영어 보기</button>
     </div>
   </header>
 
@@ -451,21 +563,18 @@
     <div class="guide-banner">
       <div class="guide-title">📖 한글 눈독(目讀) 학습법</div>
       <div class="guide-desc">
-        토익스피킹은 각 파트별 질문에 답하는 <strong>[논리적 흐름]</strong>이 이미 정해져 있습니다.
-        영어로 말하려고 애쓰기 전에, <strong>"이 유형에서는 어떤 한글 흐름으로 답변을 완성하는가?"</strong>를 눈으로 먼저 보면서 머릿속에 답안 틀을 완벽히 각인시키세요.
+        1. 질문 상황(문제)을 한글로 읽고 <strong>[187개 문장 조합 한글 답안지]</strong>를 눈으로 먼저 익힙니다.<br>
+        2. 답안지 상단의 <strong>[🇺🇸 영어 원문 보기]</strong> 버튼을 누르면 영어 문장을 대조하며 학습할 수 있습니다.
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- PART 2: 사진 묘사 -->
-    <!-- ========================================================================= -->
+    <!-- PART 2 -->
     <section id="p2" class="part-section">
       <div class="part-header p2">
         <div class="part-title">Part 2. 사진 묘사 (Q3 ~ Q4)</div>
         <div class="part-summary">준비 45초 / 답변 30초 | [장소] → [중심 인물] → [위치/동작] → [복장] → [주변/배경]</div>
       </div>
-
-      <!-- P2-1: 공원 사진 -->
+      
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -476,21 +585,29 @@
         </div>
 
         <div class="prompt-box">
-          <div class="prompt-label">❓ 사진 상황 (문제)</div>
-          <div class="prompt-text">
-            중앙에 시원한 분수가 있고, 앞쪽 테이블에는 두 여성이 커피를 마시며 담소를 나누고 있으며, 뒤쪽에는 정장 차림의 남성들이 서 있고, 왼쪽 인도에서는 반려견을 산책시키는 남자가 있는 공원 사진.
-          </div>
+          <div class="prompt-label">❓ 사진 상황 / 질문 (문제)</div>
+          <div class="prompt-text">중앙에 시원한 분수가 있고, 앞쪽 테이블에는 두 여성이 커피를 마시며 담소를 나누고 있으며, 뒤쪽에는 정장 차림의 남성들이 서 있고, 왼쪽 인도에서는 반려견을 산책시키는 남자가 있는 공원 사진.</div>
         </div>
 
         <div class="answer-box">
-          <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
-          <div class="answer-content">
-<span class="step-badge">1. 장소</span> 이 사진은 공원에서 찍힌 사진입니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">1. 장소</span> 이 사진은 공원에서 찍힌 사진입니다.
 <span class="step-badge">2. 중심 인물</span> 이 사진에서 가장 먼저 눈에 띄는 것은 테이블에 둘러앉아 있는 두 여성입니다.
 <span class="step-badge">3. 세부 동작</span> 사진 앞쪽에는 분수가 보이며, 한 여성은 손에 컵을 쥐고 있고 그들은 서로 대화를 나누고 있습니다.
 <span class="step-badge">4. 주변 인물</span> 그녀 옆에는 또 다른 여성이 있고, 그녀 뒤편에 서 있는 두 남자가 보입니다.
 <span class="step-badge">5. 복장</span> 그들 대부분은 단정한 정장 차림을 하고 있지만, 몇몇은 편안한 평상복을 입고 있습니다.
-<span class="step-badge">6. 배경 및 마무리</span> 사진 왼쪽에는 인도가 있고 반려견을 산책시키는 사람도 보입니다. 전반적으로 공원 분위기가 매우 평화롭고 쾌적해 보입니다.
+<span class="step-badge">6. 배경 및 마무리</span> 사진 왼쪽에는 인도가 있고 반려견을 산책시키는 사람도 보입니다. 전반적으로 공원 분위기가 매우 평화롭고 쾌적해 보입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 모범 답안 (English Model Answer)</div>
+            <div class="en-text">This is a picture taken at a park.
+The first thing I can see in this picture is two women sitting at a table.
+In the foreground of the picture, I can see a fountain. She is holding a cup, and they are having a conversation.
+Next to her, there is another woman, and behind her, I can see two men standing.
+Most of them are wearing formal clothes, but some of them are wearing casual clothes.
+On the left side of the picture, there is a sidewalk, and a man is walking a dog. Overall, the scene looks very peaceful and pleasant.</div>
           </div>
         </div>
 
@@ -500,7 +617,6 @@
         </div>
       </div>
 
-      <!-- P2-2: 카페/식당/결제 -->
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -511,20 +627,27 @@
         </div>
 
         <div class="prompt-box">
-          <div class="prompt-label">❓ 사진 상황 (문제)</div>
-          <div class="prompt-text">
-            카페 안에서 직원이 손님에게 음식을 서빙하고 있고, 카운터(계산대) 앞에서는 손님들이 줄을 서서 신용카드를 건네며 결제 중이며, 한 손님은 가방 안을 보고 다른 손님은 메뉴판을 확인하는 사진.
-          </div>
+          <div class="prompt-label">❓ 사진 상황 / 질문 (문제)</div>
+          <div class="prompt-text">카페 안에서 직원이 손님에게 음식을 서빙하고 있고, 카운터(계산대) 앞에서는 손님들이 줄을 서서 신용카드를 건네며 결제 중이며, 한 손님은 가방 안을 보고 다른 손님은 메뉴판을 확인하는 사진.</div>
         </div>
 
         <div class="answer-box">
-          <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
-          <div class="answer-content">
-<span class="step-badge">1. 장소</span> 이 사진은 카페 내부에서 찍힌 사진입니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">1. 장소</span> 이 사진은 카페 내부에서 찍힌 사진입니다.
 <span class="step-badge">2. 중심 동작</span> 사진 중앙에서 한 여성이 손님들에게 음식을 서빙하고 있습니다.
 <span class="step-badge">3. 계산대 동작</span> 사진 오른쪽에서는 손님들이 계산대 앞에 서서 차례를 기다리며 줄을 서 있습니다.
 <span class="step-badge">4. 결제 및 소지품</span> 한 남자는 신용카드를 건네며 결제하고 있고, 그녀 옆의 여성은 가방 안을 들여다보고 있습니다.
-<span class="step-badge">5. 배경</span> 뒤쪽의 다른 손님은 메뉴판을 살펴보고 있습니다. 전반적으로 매장 안이 활기차고 바빠 보입니다.
+<span class="step-badge">5. 배경</span> 뒤쪽의 다른 손님은 메뉴판을 살펴보고 있습니다. 전반적으로 매장 안이 활기차고 바빠 보입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 모범 답안 (English Model Answer)</div>
+            <div class="en-text">This is a picture taken at a cafe.
+In the middle of the picture, she is serving food to customers.
+On the right side of the picture, they are standing at the cashier and waiting in line.
+A man is handing over a credit card, and next to him, she is looking into a bag.
+In the background, another customer is looking at a menu. Overall, the place looks very busy and lively.</div>
           </div>
         </div>
 
@@ -534,7 +657,6 @@
         </div>
       </div>
 
-      <!-- P2-3: 사무실/회의실 -->
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -545,20 +667,27 @@
         </div>
 
         <div class="prompt-box">
-          <div class="prompt-label">❓ 사진 상황 (문제)</div>
-          <div class="prompt-text">
-            회의실에서 정장 차림의 남성이 스크린 앞에서 프레젠테이션 발표를 하고 있고, 테이블에 앉은 동료들은 서류를 보거나 태블릿을 조작하며 중요한 내용을 메모하는 사진.
-          </div>
+          <div class="prompt-label">❓ 사진 상황 / 질문 (문제)</div>
+          <div class="prompt-text">회의실에서 정장 차림의 남성이 스크린 앞에서 프레젠테이션 발표를 하고 있고, 테이블에 앉은 동료들은 서류를 보거나 태블릿을 조작하며 중요한 내용을 메모하는 사진.</div>
         </div>
 
         <div class="answer-box">
-          <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
-          <div class="answer-content">
-<span class="step-badge">1. 장소</span> 이 사진은 사무실 회의실에서 촬영된 사진입니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">1. 장소</span> 이 사진은 사무실 회의실에서 촬영된 사진입니다.
 <span class="step-badge">2. 중심 인물</span> 한 남성이 사람들 앞에서 서서 프레젠테이션 발표를 하고 있습니다.
 <span class="step-badge">3. 동료들 동작</span> 테이블에 앉아 있는 사람들은 서류를 손에 쥐고 집중해서 읽고 있습니다.
 <span class="step-badge">4. 세부 행동</span> 한 사람은 무언가를 메모하고 있고, 다른 사람은 태블릿 PC를 조작하고 있습니다.
-<span class="step-badge">5. 복장 및 분위기</span> 대부분 단정한 정장 차림을 하고 있으며, 다들 회의에 매우 진지하게 몰입하고 있습니다.
+<span class="step-badge">5. 복장 및 분위기</span> 대부분 단정한 정장 차림을 하고 있으며, 다들 회의에 매우 진지하게 몰입하고 있습니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 모범 답안 (English Model Answer)</div>
+            <div class="en-text">This is a picture taken at a meeting room in an office.
+A man is standing in front of people and making a presentation.
+People sitting at a table are holding documents and reading them carefully.
+One person is writing something down, and another person is using a tablet.
+Most of them are wearing formal clothes, and everyone looks deeply focused on the meeting.</div>
           </div>
         </div>
 
@@ -567,18 +696,16 @@
           발표 <span class="sent-tag">33번</span> + 착석 및 서류 읽기 <span class="sent-tag">21, 32, 35번</span> + 필기 및 태블릿 <span class="sent-tag">13, 34번</span> + 정장 복장 <span class="sent-tag">10번</span>
         </div>
       </div>
+
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- PART 3: 일상 대화 질문 응답 -->
-    <!-- ========================================================================= -->
+    <!-- PART 3 -->
     <section id="p3" class="part-section">
       <div class="part-header p3">
         <div class="part-title">Part 3. 일상 대화 질문 응답 (Q5 ~ Q7)</div>
         <div class="part-summary">준비 0초 / 답변 Q5(15초), Q6(15초), Q7(30초) | [바쁜 직장인/예산 한계] + [가성비/시간절약] + [스마트폰 편리성]</div>
       </div>
-
-      <!-- P3-1: 스마트폰 & 온라인 쇼핑 -->
+      
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -594,8 +721,15 @@
           <div class="prompt-text">얼마나 자주 온라인으로 물건을 쇼핑하며, 주로 어떤 품목을 구입하나요?</div>
         </div>
         <div class="answer-box">
-          <div class="answer-label">💡 [Q5] 정해진 한글 답안</div>
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 [Q5] 정해진 한글 답안</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
           <div class="answer-content">저는 일상생활에서 그것을 매우 자주 이용합니다. 매일 반복하는 제 하루 일과의 한 부분이며, 보통 일주일에 한 번씩 옷과 생필품을 주로 구입합니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Q5 Answer)</div>
+            <div class="en-text">I frequently use it. It's part of my routine, and I usually buy clothes and daily necessities once a week.</div>
+          </div>
         </div>
 
         <!-- Q6 -->
@@ -604,8 +738,15 @@
           <div class="prompt-text">오프라인 매장에 직접 가는 것보다 온라인 쇼핑을 더 선호하는 가장 큰 이유는 무엇인가요?</div>
         </div>
         <div class="answer-box">
-          <div class="answer-label">💡 [Q6] 정해진 한글 답안</div>
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 [Q6] 정해진 한글 답안</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
           <div class="answer-content">가격이 훨씬 저렴하고 처리도 훨씬 빨라서 돈과 시간을 크게 아낄 수 있습니다. 가격대가 매우 합리적이며, 스마트폰만 있으면 언제 어디서나 손쉽게 정보를 찾을 수 있기 때문입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Q6 Answer)</div>
+            <div class="en-text">It's cheaper and faster, so I can save money and save time. The price is reasonable, and I can get information anytime, anywhere on my smartphone.</div>
+          </div>
         </div>
 
         <!-- Q7 -->
@@ -614,12 +755,20 @@
           <div class="prompt-text">친구나 가족에게 줄 선물을 살 때, 백화점이나 매장을 방문하는 것보다 스마트폰 앱으로 주문하는 것을 선호하나요? 그 이유는?</div>
         </div>
         <div class="answer-box">
-          <div class="answer-label">💡 [Q7] 30초 완성 한글 답안지</div>
-          <div class="answer-content">
-<span class="step-badge">결론</span> 네, 저는 스마트폰 앱으로 선물을 주문하는 것을 훨씬 선호합니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 [Q7] 30초 완성 한글 답안지</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">결론</span> 네, 저는 스마트폰 앱으로 선물을 주문하는 것을 훨씬 선호합니다.
 <span class="step-badge">이유 1: 시간 부족</span> 첫째로, 저는 직장인이라 평소 업무로 바쁘고 개인적인 여유 시간이 거의 없습니다. 굳이 밖으로 나가거나 매장에서 줄을 서서 기다리느라 시간을 낭비하고 싶지 않습니다.
 <span class="step-badge">이유 2: 편리함/신뢰</span> 둘째로, 사용하기가 매우 편리하고 유용합니다. 요즘 가장 잘나가는 대세 인기 상품을 쉽게 찾을 수 있고, 품질을 신뢰할 수 있어서 안심하고 제품을 살 수 있습니다.
-<span class="step-badge">마무리</span> 무엇보다도 더 저렴해서 빠듯한 주머니 사정에서 돈을 절약할 수 있어 최고의 선택입니다.
+<span class="step-badge">마무리</span> 무엇보다도 더 저렴해서 빠듯한 주머니 사정에서 돈을 절약할 수 있어 최고의 선택입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Q7 Answer)</div>
+            <div class="en-text">Yes, I definitely prefer ordering gifts on my smartphone app.
+First of all, I'm a worker, so I'm busy with my work and I don't have much time. I don't want to waste time going out and waiting in line.
+Secondly, it's very convenient and useful. I can easily find popular items, and they provide reliable reviews, so I can trust the product.
+Most of all, it's cheaper, so I can save money on my tight budget.</div>
           </div>
         </div>
 
@@ -629,7 +778,6 @@
         </div>
       </div>
 
-      <!-- P3-2: 여가/힐링/취미 -->
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -644,12 +792,20 @@
           <div class="prompt-text">주말이나 휴일에 집에서 쉬는 것보다 새로운 카페나 명소를 찾아다니는 것을 좋아하는 편인가요? 그 이유는?</div>
         </div>
         <div class="answer-box">
-          <div class="answer-label">💡 [Q7] 30초 완성 한글 답안지</div>
-          <div class="answer-content">
-<span class="step-badge">결론</span> 네, 저는 새로운 핫플레이스나 명소를 찾아다니는 것을 아주 좋아합니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 [Q7] 30초 완성 한글 답안지</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">결론</span> 네, 저는 새로운 핫플레이스나 명소를 찾아다니는 것을 아주 좋아합니다.
 <span class="step-badge">이유 1: 스트레스 해소</span> 첫째로, 요즘 업무 스트레스를 많이 받아서 제게 기분 전환이 꼭 필요합니다. 새로운 곳을 가면 쌓인 스트레스가 확 풀리고, 기분을 즐겁게 해줘서 골치 아픈 고민거리를 잊게 해줍니다.
 <span class="step-badge">이유 2: 새로운 경험</span> 둘째로, 저는 새로운 것에 도전하고 경험하는 것을 즐깁니다. 그곳들은 훌륭한 부대시설과 쾌적한 환경을 제공하며 멋진 추억과 경험을 선사합니다.
-<span class="step-badge">마무리</span> 흥미진진하고 재미있어서 시간 가는 줄 모르기 때문에 주말마다 즐겨 찾는 최애 활동입니다.
+<span class="step-badge">마무리</span> 흥미진진하고 재미있어서 시간 가는 줄 모르기 때문에 주말마다 즐겨 찾는 최애 활동입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Q7 Answer)</div>
+            <div class="en-text">Yes, I really like visiting new popular places on weekends.
+First of all, I'm stressed out these days, so I need it. It relieves my stress and makes me happy, so I can forget about my worries.
+Secondly, I like to try new things. They have great facilities, provide a good environment, and give me a pleasant experience.
+It's more fun and entertaining, so it's my favorite thing to do.</div>
           </div>
         </div>
 
@@ -658,18 +814,16 @@
           스트레스 해소 <span class="sent-tag">50, 51번</span> + 고민 잊기 <span class="sent-tag">88번</span> + 새로운 시도 <span class="sent-tag">74번</span> + 시설/환경/만족 <span class="sent-tag">58, 72, 73번</span> + 재미/최애 활동 <span class="sent-tag">87, 89번</span>
         </div>
       </div>
+
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- PART 4: 제공된 정보 활용 답변 -->
-    <!-- ========================================================================= -->
+    <!-- PART 4 -->
     <section id="p4" class="part-section">
       <div class="part-header p4">
         <div class="part-title">Part 4. 제공된 정보 보고 답변하기 (Q8 ~ Q10)</div>
         <div class="part-summary">준비 45초 / 답변 Q8(15초), Q9(15초), Q10(30초) | [행사 일시/장소] → [잘못된 정보 정정] → [2개 세션 묶어 상세 안내]</div>
       </div>
-
-      <!-- P4-1: 컨퍼런스 일정표 -->
+      
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -697,8 +851,15 @@
           <div class="prompt-text">컨퍼런스가 언제 어디서 개최되며, 전체 행사는 몇 시에 시작하나요?</div>
         </div>
         <div class="answer-box">
-          <div class="answer-label">💡 [Q8] 정해진 한글 답안</div>
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 [Q8] 정해진 한글 답안</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
           <div class="answer-content">컨퍼런스는 6월 20일 힐튼 호텔에서 개최되며, 오전 9시 정각에 시작될 예정입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Q8 Answer)</div>
+            <div class="en-text">The conference will be held on June 20th at the Hilton Hotel, and it will start at 9 am.</div>
+          </div>
         </div>
 
         <!-- Q9 -->
@@ -707,8 +868,15 @@
           <div class="prompt-text">제가 듣기로는 참가자 등록이 오전 10시에 시작한다고 들었는데 사실인가요?</div>
         </div>
         <div class="answer-box">
-          <div class="answer-label">💡 [Q9] 정해진 한글 답안 (만능 반박 공식)</div>
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 [Q9] 정해진 한글 답안 (만능 반박 공식)</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
           <div class="answer-content">아니요, 유감스럽게도 잘못된 정보를 알고 계십니다. 사실, 참가자 등록 및 모닝커피 세션은 1층 로비에서 오전 9시에 시작합니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Q9 Answer)</div>
+            <div class="en-text">No, I'm afraid that you have the wrong information. Actually, the registration and coffee session will start at 9 am in the lobby.</div>
+          </div>
         </div>
 
         <!-- Q10 -->
@@ -717,12 +885,20 @@
           <div class="prompt-text">오후에 진행되는 마케팅 관련 세션 일정에 대해 모두 자세히 알려주시겠어요?</div>
         </div>
         <div class="answer-box">
-          <div class="answer-label">💡 [Q10] 30초 완성 한글 답안지</div>
-          <div class="answer-content">
-<span class="step-badge">도입</span> 네, 물론입니다! 마케팅 관련해서는 총 2개의 세션이 마련되어 있습니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 [Q10] 30초 완성 한글 답안지</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">도입</span> 네, 물론입니다! 마케팅 관련해서는 총 2개의 세션이 마련되어 있습니다.
 <span class="step-badge">첫 번째 세션</span> 첫 번째로, 오후 1시에 Ray Kingston 강사님이 진행하는 SNS 마케팅 워크숍이 있습니다.
 <span class="step-badge">두 번째 세션</span> 이어서 오후 2시 30분에는 Kevin Delmont 강사님의 스포츠 팬 마케팅 전략 토론이 예정되어 있습니다.
-<span class="step-badge">마무리</span> 두 세션 모두 업무에 실질적으로 큰 도움이 될 것입니다.
+<span class="step-badge">마무리</span> 두 세션 모두 업무에 실질적으로 큰 도움이 될 것입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Q10 Answer)</div>
+            <div class="en-text">Sure! There are two sessions scheduled for marketing.
+First, at 1 pm, there is a workshop on social media marketing by Ray Kingston.
+Next, at 2:30 pm, there is a discussion on appealing to sports fans through marketing by Kevin Delmont.
+Both sessions will be very helpful to you.</div>
           </div>
         </div>
 
@@ -732,7 +908,7 @@
         </div>
       </div>
 
-      <!-- P4-2: 일정 변경 및 강좌/면접 -->
+      <!-- P4-2: 돌발 질문 -->
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -743,11 +919,24 @@
         </div>
 
         <div class="answer-box">
-          <div class="answer-label">💡 Part 4 돌발 질문 대비 만능 한글 공식</div>
-          <div class="answer-content">
-• <strong>일정 취소/연기 문의 시:</strong> "면접 일정이 잡혀 있었으나 사정상 취소되었습니다." 또는 "화요일 회의가 금요일로 일정 변경되었습니다."
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 Part 4 돌발 질문 대비 만능 한글 공식</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content">• <strong>일정 취소/연기 문의 시:</strong> "면접 일정이 잡혀 있었으나 사정상 취소되었습니다." 또는 "화요일 회의가 금요일로 일정 변경되었습니다."
 • <strong>수강료/마감일 문의 시:</strong> "유화 페인팅 클래스 수강료는 20달러이며, 정회원이시라면 무료입니다. 1월 3일까지 사전 등록을 완료하셔야 합니다."
-• <strong>지원자 경력/자격 문의 시:</strong> "그녀는 디자인 석사 학위를 취득했고, 편집장으로 5년 이상의 경력을 쌓았기 때문에 충분한 자격을 갖추었습니다."
+• <strong>지원자 경력/자격 문의 시:</strong> "그녀는 디자인 석사 학위를 취득했고, 편집장으로 5년 이상의 경력을 쌓았기 때문에 충분한 자격을 갖추었습니다."</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 (Part 4 Key Patterns)</div>
+            <div class="en-text">• Schedule Cancellation / Rescheduling:
+"There was supposed to be an interview, but it has been canceled."
+"There was supposed to be a meeting with Jane White on Tuesday, but it has been rescheduled to Friday."
+
+• Tuition Fee / Deadline:
+"You have to pay $20 for the oil painting class, but if you are a member, it's free of charge. You should register by January 3rd."
+
+• Candidate Qualifications:
+"She got a master's degree in design, and she has worked as a chief editor for five years, so I think she is well qualified."</div>
           </div>
         </div>
 
@@ -756,18 +945,16 @@
           취소/연기/변경 <span class="sent-tag">116, 117, 118번</span> + 수강료/마감일 <span class="sent-tag">130, 132, 133, 134번</span> + 학력/경력/자격 <span class="sent-tag">119, 121, 122, 128번</span>
         </div>
       </div>
+
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- PART 5: 1분 의견 제시하기 -->
-    <!-- ========================================================================= -->
+    <!-- PART 5 -->
     <section id="p5" class="part-section">
       <div class="part-header p5">
         <div class="part-title">Part 5. 1분 의견 제시하기 (Q11)</div>
         <div class="part-summary">준비 45초 / 답변 60초 | [입장 표명] → [본론 1: 핵심 근거 1] → [본론 2: 핵심 근거 2] → [결론]</div>
       </div>
-
-      <!-- P5-1: 재택근무 vs 사무실 -->
+      
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -778,14 +965,16 @@
         </div>
 
         <div class="prompt-box">
-          <div class="prompt-label">❓ 논제 (문제)</div>
+          <div class="prompt-label">❓ 사진 상황 / 질문 (문제)</div>
           <div class="prompt-text">"사무실에 출근해서 일하는 것보다 집에서 재택근무를 하는 것이 직원의 생산성에 더 좋다"는 의견에 동의하십니까, 반대하십니까? 구체적인 이유와 예시를 제시하세요.</div>
         </div>
 
         <div class="answer-box">
-          <div class="answer-label">💡 187 만능 문장 조합 [한글 60초 만점 답안지]</div>
-          <div class="answer-content">
-<span class="step-badge">1. 서론 (입장)</span> 저는 재택근무를 하는 것이 직원의 업무 생산성에 훨씬 더 좋다는 의견에 적극 동의합니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">1. 서론 (입장)</span> 저는 재택근무를 하는 것이 직원의 업무 생산성에 훨씬 더 좋다는 의견에 적극 동의합니다.
 
 <span class="step-badge">2. 본론 1: 집중력 극대화</span> 첫째로, 직원들은 주변 방해 없이 업무에 훨씬 더 깊이 몰입할 수 있습니다. 
 집에서 일할 때 주변 동료들이나 소음으로 인해 방해받을 일이 전혀 없으므로, 업무를 훨씬 더 효율적이고 생산적으로 수행할 수 있습니다. 또한 굳이 밖으로 나갈 필요가 없어 출퇴근 시간을 크게 아낄 수 있습니다.
@@ -793,7 +982,16 @@
 <span class="step-badge">3. 본론 2: 자율성과 사기 진작</span> 둘째로, 직원들은 자신의 리듬에 맞춰 주도적으로 일정을 조율할 수 있고 더 많은 자유를 누릴 수 있습니다.
 이는 일터 환경을 더 쾌적하게 개선해주고, 직원들이 자신의 직무에 대해 더 높은 만족감을 느끼게 합니다. 스트레스가 크게 줄어들면 직장에서 더 좋은 성과를 거둘 수 있습니다.
 
-<span class="step-badge">4. 결론 (마무리)</span> 이러한 이유들로 인해, 저는 재택근무가 생산성을 높이는 최고의 방법이라고 확신합니다.
+<span class="step-badge">4. 결론 (마무리)</span> 이러한 이유들로 인해, 저는 재택근무가 생산성을 높이는 최고의 방법이라고 확신합니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 모범 답안 (English Model Answer)</div>
+            <div class="en-text">I strongly agree that working from home is much better for employee productivity.
+
+First of all, employees can focus better. When working from home, they will not be distracted by others, so they can work more efficiently and productively without interruptions. Also, they can save time because they don't have to waste time going out.
+
+Secondly, employees can set their own schedule and have more freedom. It can make a better work environment, and employees can be more satisfied with their jobs. When workers are less stressed out, they can get good results at work.
+
+For these reasons, I believe that working from home is the best way to improve productivity.</div>
           </div>
         </div>
 
@@ -803,7 +1001,6 @@
         </div>
       </div>
 
-      <!-- P5-2: SNS 마케팅 -->
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -814,14 +1011,16 @@
         </div>
 
         <div class="prompt-box">
-          <div class="prompt-label">❓ 논제 (문제)</div>
+          <div class="prompt-label">❓ 사진 상황 / 질문 (문제)</div>
           <div class="prompt-text">"모든 기업은 전통적인 신문/TV 광고보다 SNS(소셜 미디어) 광고에 더 많은 예산을 투자해야 한다"는 주장에 동의하십니까?</div>
         </div>
 
         <div class="answer-box">
-          <div class="answer-label">💡 187 만능 문장 조합 [한글 60초 만점 답안지]</div>
-          <div class="answer-content">
-<span class="step-badge">1. 서론 (입장)</span> 저는 기업들이 SNS 마케팅에 우선적으로 투자해야 한다는 주장에 전적으로 동의합니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">1. 서론 (입장)</span> 저는 기업들이 SNS 마케팅에 우선적으로 투자해야 한다는 주장에 전적으로 동의합니다.
 
 <span class="step-badge">2. 본론 1: 모바일 접근성과 확산력</span> 첫째로, 요즘 사람들은 SNS를 달고 살기 때문에 마케팅 효과가 극대화됩니다.
 스마트폰만 있으면 언제 어디서나 손쉽게 정보를 찾고, 최신 트렌드를 빠르게 파악하여 친구들과 공유할 수 있습니다. 기존 광고보다 훨씬 신속하고 유용합니다.
@@ -829,7 +1028,16 @@
 <span class="step-badge">3. 본론 2: 비용 절감과 고객 유치</span> 둘째로, 가격이 훨씬 저렴해서 막대한 마케팅 비용을 크게 아낄 수 있습니다.
 적은 예산으로도 더 많은 신규 고객들을 매장으로 끌어모으게 될 것이며, 고객들이 큰 만족감을 느끼고 충성 고객으로 남게 되어 비즈니스가 더욱 크게 성공할 것입니다.
 
-<span class="step-badge">4. 결론 (마무리)</span> 따라서 SNS 광고는 회사의 미래를 위한 가장 가치 있는 투자입니다.
+<span class="step-badge">4. 결론 (마무리)</span> 따라서 SNS 광고는 회사의 미래를 위한 가장 가치 있는 투자입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 모범 답안 (English Model Answer)</div>
+            <div class="en-text">I completely agree that companies should invest more in social media marketing.
+
+First of all, people frequently use social media, so it will be very effective. People can get information anytime, anywhere on their smartphones, and they can get the latest information and share it with others. It's faster and more convenient than traditional ads.
+
+Secondly, it's cheaper, so companies can save money on tight budgets. It will attract more customers, and customers will feel satisfied and remain loyal, making the business more successful.
+
+Therefore, social media marketing is a good investment for the future.</div>
           </div>
         </div>
 
@@ -839,7 +1047,6 @@
         </div>
       </div>
 
-      <!-- P5-3: 대면 소통 & 팀워크 -->
       <div class="q-card">
         <div class="q-card-header">
           <div>
@@ -850,14 +1057,16 @@
         </div>
 
         <div class="prompt-box">
-          <div class="prompt-label">❓ 논제 (문제)</div>
+          <div class="prompt-label">❓ 사진 상황 / 질문 (문제)</div>
           <div class="prompt-text">"신입 사원을 채용할 때 개인적인 업무 능력보다 뛰어난 커뮤니케이션 능력과 팀워크를 갖춘 사람을 우선해야 한다"는 의견에 동의하십니까?</div>
         </div>
 
         <div class="answer-box">
-          <div class="answer-label">💡 187 만능 문장 조합 [한글 60초 만점 답안지]</div>
-          <div class="answer-content">
-<span class="step-badge">1. 서론</span> 저는 직장 내에서 원활한 소통과 팀워크 능력이 가장 중요한 역량이라는 의견에 깊이 동의합니다.
+          <div class="answer-top-bar">
+            <div class="answer-label">💡 187 만능 문장 조합 [한글 답안지]</div>
+            <button class="btn-toggle-en" onclick="toggleEn(this)">🇺🇸 영어 원문 보기</button>
+          </div>
+          <div class="answer-content"><span class="step-badge">1. 서론</span> 저는 직장 내에서 원활한 소통과 팀워크 능력이 가장 중요한 역량이라는 의견에 깊이 동의합니다.
 
 <span class="step-badge">2. 본론 1: 사내 분위기와 협업</span> 첫째로, 소통이 뛰어난 사람은 서로 존중하며 화기애애하고 친근한 사내 분위기를 조성할 수 있습니다.
 훌륭한 팀 플레이어가 되어 동료들과 돈독한 인간관계를 맺고, 오해할 소지가 적어져 불필요한 갈등을 방지합니다.
@@ -865,7 +1074,16 @@
 <span class="step-badge">3. 본론 2: 동기부여와 시너지</span> 둘째로, 다른 동료들에게 열정과 동기를 강력하게 불어넣어 줄 수 있습니다.
 오늘날 비즈니스 환경은 급변하고 경쟁이 치열하여 수많은 난관에 직면하게 되는데, 끈끈한 유대감이 있으면 직원들이 힘을 합쳐 위기를 유연하게 대처하고 더 높은 성과를 냅니다.
 
-<span class="step-badge">4. 결론</span> 그렇기 때문에 원활한 커뮤니케이션 역량은 회사 전체의 성공을 이끄는 핵심입니다.
+<span class="step-badge">4. 결론</span> 그렇기 때문에 원활한 커뮤니케이션 역량은 회사 전체의 성공을 이끄는 핵심입니다.</div>
+          <div class="en-box">
+            <div class="en-label">🇺🇸 영어 원문 모범 답안 (English Model Answer)</div>
+            <div class="en-text">I strongly agree that communication skills and teamwork are the most important qualities for new employees.
+
+First of all, they can create a friendly work atmosphere. They can be good team players and make good relationships with others, which causes less misunderstanding and prevents unnecessary conflicts.
+
+Secondly, they can motivate others with positive energy. Everything is always changing and there is a lot of competition, so people face a lot of challenges. When employees feel like a family, they can handle difficult situations together and achieve higher performance.
+
+That is why strong communication skills are essential for the company's success.</div>
           </div>
         </div>
 
@@ -874,16 +1092,15 @@
           화기애애한 분위기 <span class="sent-tag">168번</span> + 원활한 소통/팀워크 <span class="sent-tag">169, 170번</span> + 오해 방지 <span class="sent-tag">97번</span> + 동기 부여 <span class="sent-tag">173번</span> + 치열한 경쟁/위기 대처 <span class="sent-tag">174, 175, 176번</span> + 끈끈한 유대감 <span class="sent-tag">160번</span>
         </div>
       </div>
+
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- 187개 만능 한글 문장 사전 (아코디언) -->
-    <!-- ========================================================================= -->
+    <!-- 187 SENTENCES -->
     <section id="sent-all" style="margin-top: 30px;">
       <details>
         <summary>📚 187개 만능 한글 문장 전체 리스트 보기 (클릭하여 펼치기)</summary>
         <div class="sentence-mini-list" id="full-list-container">
-<div class="sent-row">
+          <div class="sent-row">
   <div class="sent-num">#1 <span class="sent-tag">Part 2 (장소 소개)</span></div>
   <div class="sent-ko">이 사진은 공원에서 찍힌 사진입니다.</div>
   <div class="sent-en">This is a picture taken at a park.</div>
@@ -1847,6 +2064,64 @@
       <span>187 문장</span>
     </a>
   </div>
+
+  <!-- JavaScript for Toggle -->
+  <script>
+    // Toggle Single English Box
+    function toggleEn(btn) {
+      const answerBox = btn.closest('.answer-box');
+      const enBox = answerBox.querySelector('.en-box');
+      if (!enBox) return;
+
+      const isShowing = enBox.classList.contains('show');
+      if (isShowing) {
+        enBox.classList.remove('show');
+        btn.classList.remove('active');
+        btn.innerText = '🇺🇸 영어 원문 보기';
+      } else {
+        enBox.classList.add('show');
+        btn.classList.add('active');
+        btn.innerText = '🔒 영어 원문 숨기기';
+      }
+    }
+
+    // Toggle All English Boxes
+    let allEnVisible = false;
+    function toggleAllEn() {
+      allEnVisible = !allEnVisible;
+      const allEnBoxes = document.querySelectorAll('.en-box');
+      const allBtns = document.querySelectorAll('.btn-toggle-en');
+      const globalBtn = document.getElementById('btn-toggle-all');
+
+      allEnBoxes.forEach(box => {
+        if (allEnVisible) {
+          box.classList.add('show');
+        } else {
+          box.classList.remove('show');
+        }
+      });
+
+      allBtns.forEach(btn => {
+        if (allEnVisible) {
+          btn.classList.add('active');
+          btn.innerText = '🔒 영어 원문 숨기기';
+        } else {
+          btn.classList.remove('active');
+          btn.innerText = '🇺🇸 영어 원문 보기';
+        }
+      });
+
+      if (allEnVisible) {
+        globalBtn.innerText = '🔒 전체 영어 숨기기';
+        globalBtn.style.background = 'var(--accent-blue)';
+        globalBtn.style.color = '#000';
+      } else {
+        globalBtn.innerText = '🇺🇸 전체 영어 보기';
+        globalBtn.style.background = 'rgba(88, 166, 255, 0.18)';
+        globalBtn.style.color = 'var(--accent-blue)';
+      }
+    }
+  </script>
 
 </body>
 </html>
